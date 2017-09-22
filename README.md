@@ -1,5 +1,6 @@
 ## API RESTful
 
+
 ### Requisitos
 - `pip install -r requirements.txt` (para instalar as dependências)
 - banco MySQL
@@ -7,9 +8,13 @@
 - após configurar o banco, executar as migrações da base de dados: `python migrate.py db init`, `python migrate.py db migrate` e `python migrate.py db upgrade` 
 
 
+## Para executar
+- `python run.py` (usem o Postman para testar os métodos)
+
 ### O que falta fazer?
 - CRUD admin
 - Melhorar o método PUT de quase todos os recursos, principalmente query parameters
+
 
 ### O que está funcionando?
 - **CR**U**D** usuário
