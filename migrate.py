@@ -7,6 +7,7 @@ from user_model import Usuario
 from horario_model import Horario
 from sala_model import Sala
 from acesso_model import Acesso
+from admin_model import Admin
 
 migrate = Migrate(app, db)
 
