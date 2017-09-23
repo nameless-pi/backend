@@ -1,4 +1,5 @@
 from flask import jsonify
+from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
@@ -9,6 +10,7 @@ schema = AdminSchema()
 
 
 class AdminResource(Resource):
+	@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("login", type=str, required=True, location='json')

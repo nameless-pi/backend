@@ -1,4 +1,5 @@
-from flask import jsonify, request
+from flask import jsonify
+from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
@@ -10,12 +11,13 @@ schema = UsuarioSchema()
 
 
 class UsuarioResource(Resource):
+	@jwt_required()
 	def get(self, id):
 		user_query = Usuario.query.get(id)
 		result = schema.dump(user_query).data
 		return result
 
-	# OLHAR QUERY PARAMETERS \\ FUNCIONANDO APENAS PARA EDITAR NOME
+	@jwt_required()
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
@@ -85,6 +87,7 @@ class UsuarioResource(Resource):
 		db.session.commit()
 		return schema.dump(user).data
 
+	@jwt_required()
 	def delete(self, id):
 		try:
 			user = Usuario.query.get(id)
@@ -103,11 +106,13 @@ class UsuarioResource(Resource):
 
 
 class UsuarioListResource(Resource):
+	@jwt_required()
 	def get(self):
 		users_query = Usuario.query.all()
 		results = schema.dump(users_query, many=True).data
 		return results
 
+	@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location='json')

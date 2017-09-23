@@ -1,4 +1,5 @@
 from flask import jsonify
+from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
@@ -9,14 +10,17 @@ schema = HorarioSchema()
 
 
 class HorarioResource(Resource):
+	@jwt_required()
 	def get(self, id):
 		horario_query = Horario.query.get(id)
 		result = schema.dump(horario_query).data
 		return result
 
+	@jwt_required()
 	def put(self, id):
 		pass  # TO DO
 
+	@jwt_required()
 	def delete(self, id):
 		try:
 			horario = Horario.query.get(id)
@@ -35,11 +39,13 @@ class HorarioResource(Resource):
 
 
 class HorarioListResource(Resource):
+	@jwt_required()
 	def get(self):
 		horarios_query = Horario.query.all()
 		results = schema.dump(horarios_query, many=True).data
 		return results
 
+	@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 
