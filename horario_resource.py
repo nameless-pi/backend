@@ -63,4 +63,4 @@ class HorarioListResource(Resource):
 			resp.status_code = 403
 			return resp
 		else:
-			return schema.dump(query).data, 201, {'location': '/horarios/' + str(horario.id)}
+			return schema.dump(query).data, 201, {'location': 'api/v1/horarios/' + str(horario.id)}

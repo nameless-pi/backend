@@ -57,4 +57,4 @@ class SalaListResource(Resource):
 			resp.status_code = 403
 			return resp
 		else:
-			return schema.dump(query).data, 201, {'location': '/salas/' + sala.nome}
+			return schema.dump(query).data, 201, {'location': 'api/v1/salas/' + sala.nome}

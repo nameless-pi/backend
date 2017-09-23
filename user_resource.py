@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
@@ -19,11 +19,69 @@ class UsuarioResource(Resource):
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
-		parser.add_argument("nome", type=str, required=True, location='json')
-		args = parser.parse_args(strict=True)
+		parser.add_argument("nome", type=str, location='json')
+		parser.add_argument("email", type=str, location='json')
+		parser.add_argument("salas", action='append', location='json')
 
+		args = parser.parse_args(strict=True)
 		user = Usuario.query.get(id)
-		user.nome = args.get("nome")
+
+		if args["nome"] and user.nome != args["nome"]:
+			user.nome = args["nome"]
+
+		if args["email"] and user.email != args["email"]:
+			user.email = args["email"]
+
+		# CASO NÃO TENHAM SALAS NO JSON E TENHAM NO BANCO, RETIRAR O ACESSO DE TODAS AS SALAS
+		# banco: ["E100", "E007", "E003"]
+		# json:  []
+		if not args["salas"] and user.acessos:
+			try:
+				for acesso in user.acessos:
+					acesso = Acesso(id, acesso.nome_sala)
+					db.session.query(Acesso).\
+						filter(Acesso.id_usuario == id,
+								Acesso.nome_sala == acesso.nome_sala)\
+						.delete(synchronize_session='evaluate')
+			except SQLAlchemyError as e:
+				db.session.rollback()
+				resp = jsonify({"error": str(e)})
+				resp.status_code = 403
+				return resp
+
+		# CASO HAJAM SALAS NO JSON E NO BANCO
+		elif args["salas"]:
+			acessos = [acesso.nome_sala for acesso in user.acessos]
+			to_add = [sala for sala in args["salas"] if sala not in acessos]
+			to_remove = [sala for sala in acessos if sala not in args["salas"]]
+
+			# NOVO ACESSO
+			if to_add:
+				try:
+					for sala in to_add:
+						acesso = Acesso(id, sala)
+						acesso.add(acesso)
+				except SQLAlchemyError as e:
+					db.session.rollback()
+					resp = jsonify({"error": str(e)})
+					resp.status_code = 403
+					return resp
+
+			# REMOVER ACESSO
+			if to_remove:
+				try:
+					for sala in to_remove:
+						acesso = Acesso(id, sala)
+						db.session.query(Acesso).\
+							filter(Acesso.id_usuario == id,
+								Acesso.nome_sala == sala)\
+							.delete(synchronize_session='evaluate')
+				except SQLAlchemyError as e:
+					db.session.rollback()
+					resp = jsonify({"error": str(e)})
+					resp.status_code = 403
+					return resp
+
 		db.session.commit()
 		return schema.dump(user).data
 
@@ -56,17 +114,22 @@ class UsuarioListResource(Resource):
 		parser.add_argument("email", type=str, required=True, location='json')
 		parser.add_argument("rfid", type=str, required=True, location='json')
 
-		parser.add_argument("salas", action='append', required=True, location='json')
+		parser.add_argument("salas", action='append', location='json')
 		args = parser.parse_args(strict=True)
 
 		try:
 			user = Usuario(args["nome"], args["email"], args["rfid"])
 			user.add(user)
-
-			for sala in args["salas"]:
-				acesso = Acesso(user.id, sala)
-				acesso.add(acesso)
-
+			if args["salas"]:
+				try:
+					for sala in args["salas"]:
+						acesso = Acesso(user.id, sala)
+						acesso.add(acesso)
+				except SQLAlchemyError as e:
+					db.session.rollback()
+					resp = jsonify({"error": str(e)})
+					resp.status_code = 403
+					return resp
 			query = Usuario.query.get(user.id)
 
 		except SQLAlchemyError as e:
@@ -76,4 +139,4 @@ class UsuarioListResource(Resource):
 			return resp
 		else:
 			# 				JSON 		status_code		location
-			return schema.dump(query).data, 201, {'location': '/users/' + str(user.id)}
+			return schema.dump(query).data, 201, {'location': 'api/v1/users/' + str(user.id)}

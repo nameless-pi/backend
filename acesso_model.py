@@ -18,7 +18,6 @@ class Acesso(db.Model, CRUD):
 
 
 class AcessoSchema(Schema):
-	id = fields.Integer()
 	nome_sala = fields.String()
 
 	class Meta:
