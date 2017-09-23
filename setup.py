@@ -5,7 +5,7 @@ from flask_jwt import JWT
 
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app, prefix="/api/v1")
 
 app.config.from_object('config')
 
