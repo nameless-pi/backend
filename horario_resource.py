@@ -48,7 +48,7 @@ class HorarioResource(Resource):
 		if args["sync"] and args["sync"] != horario.sync:
 			horario.sync = args["sync"]
 
-		db.session.commit()
+		horario.update()
 		return schema.dump(horario).data
 
 	@jwt_required()

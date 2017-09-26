@@ -88,7 +88,7 @@ class UsuarioResource(Resource):
 					resp.status_code = 403
 					return resp
 
-		db.session.commit()
+		user.update()
 		return schema.dump(user).data
 
 	@jwt_required()
