@@ -7,11 +7,11 @@ class Horario(db.Model, CRUD):
 	__tablename__ = "horario"
 
 	id = db.Column(db.Integer, primary_key=True)
-	hora_inicio = db.Column(db.DateTime, nullable=False)
-	hora_fim = db.Column(db.DateTime, nullable=False)
-	dia = db.Column(db.String(15), nullable=False)
-	tipo_user = db.Column(db.String(15), nullable=False)
 	sync = db.Column(db.Boolean, nullable=False)
+	dia = db.Column(db.String(15), nullable=False)
+	hora_fim = db.Column(db.DateTime, nullable=False)
+	hora_inicio = db.Column(db.DateTime, nullable=False)
+	tipo_user = db.Column(db.String(10), nullable=False)
 	nome_sala = db.Column(db.String(4), db.ForeignKey('sala.nome'), nullable=False)
 
 	def __init__(self, nome_sala, hora_fim, hora_inicio, dia, tipo_user, sync):

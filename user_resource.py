@@ -22,6 +22,7 @@ class UsuarioResource(Resource):
 		parser = reqparse.RequestParser()
 
 		parser.add_argument("nome", type=str, location='json')
+		parser.add_argument("tipo", type=str, location='json')
 		parser.add_argument("email", type=str, location='json')
 		parser.add_argument("salas", action='append', location='json')
 
@@ -33,6 +34,9 @@ class UsuarioResource(Resource):
 
 		if args["email"] and user.email != args["email"]:
 			user.email = args["email"]
+
+		if args["tipo"] and user.tipo != args["tipo"]:
+			user.tipo = args["tipo"]
 
 		# CASO NÃO TENHAM SALAS NO JSON E TENHAM NO BANCO, RETIRAR O ACESSO DE TODAS AS SALAS
 		# banco: ["E100", "E007", "E003"]
@@ -116,14 +120,15 @@ class UsuarioListResource(Resource):
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location='json')
-		parser.add_argument("email", type=str, required=True, location='json')
 		parser.add_argument("rfid", type=str, required=True, location='json')
+		parser.add_argument("tipo", type=str, required=True, location='json')
+		parser.add_argument("email", type=str, required=True, location='json')
 
 		parser.add_argument("salas", action='append', location='json')
 		args = parser.parse_args(strict=True)
 
 		try:
-			user = Usuario(args["nome"], args["email"], args["rfid"])
+			user = Usuario(args["nome"], args["email"], args["rfid"], args["tipo"])
 			user.add(user)
 			if args["salas"]:
 				try:
