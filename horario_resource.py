@@ -18,7 +18,38 @@ class HorarioResource(Resource):
 
 	@jwt_required()
 	def put(self, id):
-		pass  # TO DO
+		parser = reqparse.RequestParser()
+
+		parser.add_argument("nome_sala", type=str, location='json')
+		parser.add_argument("hora_inicio", type=str, location='json')
+		parser.add_argument("hora_fim", type=str, location='json')
+		parser.add_argument("dia", type=str, location='json')
+		parser.add_argument("tipo_user", type=str, location='json')
+		parser.add_argument("sync", type=str, location='json')
+
+		args = parser.parse_args(strict=True)
+		horario = Horario.query.get(id)
+
+		if args["nome_sala"] and args["nome_sala"] != horario.nome_sala:
+			horario.nome_sala = args["nome_sala"]
+
+		if args["hora_inicio"] and args["hora_inicio"] != horario.hora_inicio:
+			horario.hora_inicio = args["hora_inicio"]
+
+		if args["hora_fim"] and args["hora_fim"] != horario.hora_fim:
+			horario.hora_fim = args["hora_fim"]
+
+		if args["dia"] and args["dia"] != horario.dia:
+			horario.dia = args["dia"]
+
+		if args["tipo_user"] and args["tipo_user"] != horario.tipo_user:
+			horario.tipo_user = args["tipo_user"]
+
+		if args["sync"] and args["sync"] != horario.sync:
+			horario.sync = args["sync"]
+
+		db.session.commit()
+		return schema.dump(horario).data
 
 	@jwt_required()
 	def delete(self, id):
