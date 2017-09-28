@@ -10,13 +10,13 @@ schema = HorarioSchema()
 
 
 class HorarioResource(Resource):
-	@jwt_required()
+	# @jwt_required()
 	def get(self, id):
 		horario_query = Horario.query.get(id)
 		result = schema.dump(horario_query).data
 		return result
 
-	@jwt_required()
+	# @jwt_required()
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
@@ -51,7 +51,7 @@ class HorarioResource(Resource):
 		horario.update()
 		return schema.dump(horario).data
 
-	@jwt_required()
+	# @jwt_required()
 	def delete(self, id):
 		try:
 			horario = Horario.query.get(id)
@@ -70,13 +70,13 @@ class HorarioResource(Resource):
 
 
 class HorarioListResource(Resource):
-	@jwt_required()
+	# @jwt_required()
 	def get(self):
 		horarios_query = Horario.query.all()
 		results = schema.dump(horarios_query, many=True).data
 		return results
 
-	@jwt_required()
+	# @jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 

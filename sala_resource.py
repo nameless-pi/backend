@@ -10,17 +10,17 @@ schema = SalaSchema()
 
 
 class SalaResource(Resource):
-	@jwt_required()
+	# @jwt_required()
 	def get(self, nome):
 		sala_query = Sala.query.get(nome)
 		result = schema.dump(sala_query).data
 		return result
 
-	@jwt_required()
+	# @jwt_required()
 	def put(self, nome):
 		pass  # TO DO
 
-	@jwt_required()
+	# @jwt_required()
 	def delete(self, nome):
 		try:
 			sala = Sala.query.get(nome)
@@ -39,13 +39,13 @@ class SalaResource(Resource):
 
 
 class SalaListResource(Resource):
-	@jwt_required()
+	# @jwt_required()
 	def get(self):
 		salas = Sala.query.all()
 		results = schema.dump(salas, many=True).data
 		return results
 
-	@jwt_required()
+	# @jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location='json')
