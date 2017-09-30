@@ -5,6 +5,7 @@ from marshmallow_enum import EnumField
 from base import CRUD, db
 from enums import Dia, TipoUsuario
 
+
 class Horario(db.Model, CRUD):
 	__tablename__ = "horario"
 

@@ -1,8 +1,7 @@
 from marshmallow import Schema, fields
 
 from base import CRUD, db
-from acesso_model import DireitoAcesso
-from horario_model import Horario, HorarioSchema
+from horario_model import HorarioSchema
 
 
 class Sala(db.Model, CRUD):

@@ -5,7 +5,7 @@ from marshmallow_enum import EnumField
 
 from base import CRUD, db
 from enums import TipoUsuario
-from acesso_model import DireitoAcesso, AcessoSchema
+from acesso_model import AcessoSchema
 
 
 class Usuario(db.Model, CRUD):
