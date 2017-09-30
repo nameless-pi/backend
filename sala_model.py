@@ -9,8 +9,8 @@ class Sala(db.Model, CRUD):
 
 	id = db.Column(db.Integer, primary_key=True)
 	nome = db.Column(db.String(4), unique=True)
-	horarios = db.relationship('Horario', cascade="delete")
-	acesso = db.relationship('DireitoAcesso', cascade="delete")
+	horarios = db.relationship("Horario", cascade="delete")
+	acesso = db.relationship("DireitoAcesso", cascade="delete")
 
 	def __init__(self, nome):
 		self.nome = nome
@@ -22,4 +22,4 @@ class SalaSchema(Schema):
 	horarios = fields.Nested(HorarioSchema, many=True)
 
 	class Meta:
-		type_ = 'sala'
+		type_ = "sala"

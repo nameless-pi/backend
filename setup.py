@@ -8,8 +8,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 api = Api(app, prefix="/api/v1")
 
-app.config.from_object('config')
-# app.config.from_pyfile('config.py')
+app.config.from_object("config")
+# app.config.from_pyfile("config.py")
 
 # cors = CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 db = SQLAlchemy(app)
@@ -17,13 +17,13 @@ db = SQLAlchemy(app)
 
 @app.after_request
 def after_request(response):
-	response.headers.add('Access-Control-Allow-Origin', '*')
-	if request.method == 'OPTIONS':
-		response.headers.add('Access-Control-Allow-Headers', "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With")
-		response.headers.add('Access-Control-Allow-Methods', 'DELETE, GET, POST, PUT')
-		headers = request.headers.get('Access-Control-Request-Headers')
+	response.headers.add("Access-Control-Allow-Origin", "*")
+	if request.method == "OPTIONS":
+		response.headers.add("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With")
+		response.headers.add("Access-Control-Allow-Methods", "DELETE, GET, POST, PUT")
+		headers = request.headers.get("Access-Control-Request-Headers")
 		if headers:
-			response.headers.add('Access-Control-Allow-Headers', headers)
+			response.headers.add("Access-Control-Allow-Headers", headers)
 	return response
 
 
@@ -37,7 +37,7 @@ def authenticate(login, password):
 
 
 def identity(payload):
-	user_id = payload['identity']
+	user_id = payload["identity"]
 	return Admin.query.get(user_id).login
 
 

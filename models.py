@@ -8,7 +8,7 @@ class Eventos(db.Model, CRUD):
 	id = db.Column(db.Integer, primary_key=True)
 	evento = db.Column(db.Enum(Evento), nullable=False)
 	horario = db.Column(db.DateTime, nullable=False)
-	id_direito_acesso = db.Column(db.Integer, db.ForeignKey('direito_acesso.id'))
+	id_direito_acesso = db.Column(db.Integer, db.ForeignKey("direito_acesso.id"))
 
 	def __init__(self, evento, horario):
 		self.evento = evento

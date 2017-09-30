@@ -13,8 +13,8 @@ class AdminResource(Resource):
 	# @jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
-		parser.add_argument("login", type=str, required=True, location='json')
-		parser.add_argument("password", type=str, required=True, location='json')
+		parser.add_argument("login", type=str, required=True, location="json")
+		parser.add_argument("password", type=str, required=True, location="json")
 
 		args = parser.parse_args(strict=True)
 
@@ -24,7 +24,7 @@ class AdminResource(Resource):
 			query = Admin.query.get(admin.id)
 		except SQLAlchemyError as e:
 			db.session.rollback()
-			response = jsonify({'message': str(e)})
+			response = jsonify({"message": str(e)})
 			response.status_code = 403
 			return response
 		else:

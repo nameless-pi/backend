@@ -9,10 +9,10 @@ SQLALCHEMY_ECHO = True
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 # MYSQL - TROCAR NOMES
-mysql_db_username = 'kds'
-mysql_db_password = ''
-mysql_db_name = 'pi'
-mysql_db_hostname = 'localhost'
+mysql_db_username = "kds"
+mysql_db_password = ""
+mysql_db_name = "pi"
+mysql_db_hostname = "localhost"
 
 # MySQL + SQLAlchemy
 SQLALCHEMY_DATABASE_URI = ("mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_ADDR}/{DB_NAME}"

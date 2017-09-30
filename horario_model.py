@@ -15,7 +15,7 @@ class Horario(db.Model, CRUD):
 	hora_fim = db.Column(db.Time, nullable=False)
 	hora_inicio = db.Column(db.Time, nullable=False)
 	tipo_user = db.Column(db.Enum(TipoUsuario), nullable=False)
-	id_sala = db.Column(db.Integer, db.ForeignKey('sala.id'), nullable=False)
+	id_sala = db.Column(db.Integer, db.ForeignKey("sala.id"), nullable=False)
 
 	def __init__(self, id_sala, dia, hora_fim, hora_inicio, tipo_user):
 		self.id_sala = id_sala
@@ -36,4 +36,4 @@ class HorarioSchema(Schema):
 	last_update = fields.DateTime()
 
 	class Meta:
-		type_ = 'horario'
+		type_ = "horario"

@@ -14,7 +14,7 @@ class SalaResource(Resource):
 	def get(self, id):
 		sala_query = Sala.query.get(id)
 		if not sala_query:
-			response = jsonify({"message": "Sala {} doesn't exist".format(id)})
+			response = jsonify({"message": "Sala {} não existe".format(id)})
 			response.status_code = 404
 			return response
 		return schema.dump(sala_query).data
@@ -22,13 +22,13 @@ class SalaResource(Resource):
 	# @jwt_required()
 	def put(self, id):
 		parser = reqparse.RequestParser()
-		parser.add_argument("nome", type=str, required=True, location='json')
+		parser.add_argument("nome", type=str, required=True, location="json")
 
 		args = parser.parse_args(strict=True)
 		sala = Sala.query.get(id)
 
 		if not sala:
-			response = jsonify({"message": "Sala {} doesn't exist".format(id)})
+			response = jsonify({"message": "Sala {} não existe".format(id)})
 			response.status_code = 404
 			return response
 
@@ -50,7 +50,7 @@ class SalaResource(Resource):
 		try:
 			sala = Sala.query.get(id)
 			if not sala:
-				response = jsonify({"message": "Sala {} doesn't exist".format(id)})
+				response = jsonify({"message": "Sala {} não existe".format(id)})
 				response.status_code = 404
 				return response
 			sala.delete(sala)
@@ -73,7 +73,7 @@ class SalaListResource(Resource):
 	# @jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
-		parser.add_argument("nome", type=str, required=True, location='json')
+		parser.add_argument("nome", type=str, required=True, location="json")
 
 		args = parser.parse_args(strict=True)
 		try:
@@ -87,4 +87,4 @@ class SalaListResource(Resource):
 			resp.status_code = 403
 			return resp
 		else:
-			return schema.dump(query).data, 201, {'location': 'api/v1/salas/' + str(query.id)}
+			return schema.dump(query).data, 201, {"location": "api/v1/salas/" + str(query.id)}

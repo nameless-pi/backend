@@ -16,7 +16,7 @@ class Usuario(db.Model, CRUD):
 	tipo = db.Column(db.Enum(TipoUsuario), nullable=False)
 	email = db.Column(db.String(100), nullable=False, unique=True)
 	rfid = db.Column(db.String(16), nullable=False, unique=True)
-	direito_acesso = db.relationship('DireitoAcesso', cascade="delete")
+	direito_acesso = db.relationship("DireitoAcesso", cascade="delete")
 	last_update = db.Column(db.DateTime(), nullable=False)
 
 	def __init__(self, nome, email, rfid, tipo):
@@ -37,4 +37,4 @@ class UsuarioSchema(Schema):
 	direito_acesso = fields.Nested(AcessoSchema, many=True)
 
 	class Meta:
-		type_ = 'usuario'
+		type_ = "usuario"

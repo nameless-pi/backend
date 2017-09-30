@@ -14,7 +14,7 @@ class HorarioResource(Resource):
 	def get(self, id):
 		horario_query = Horario.query.get(id)
 		if not horario_query:
-			response = jsonify({"message": "Horario {} doesn't exist".format(id)})
+			response = jsonify({"message": "Horario {} não existe".format(id)})
 			response.status_code = 404
 			return response
 		result = schema.dump(horario_query).data
@@ -24,16 +24,16 @@ class HorarioResource(Resource):
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
-		parser.add_argument("hora_inicio", type=str, location='json')
-		parser.add_argument("hora_fim", type=str, location='json')
-		parser.add_argument("dia", type=str, location='json')
-		parser.add_argument("tipo_user", type=str, location='json')
+		parser.add_argument("hora_inicio", type=str, location="json")
+		parser.add_argument("hora_fim", type=str, location="json")
+		parser.add_argument("dia", type=str, location="json")
+		parser.add_argument("tipo_user", type=str, location="json")
 
 		args = parser.parse_args(strict=True)
 		horario = Horario.query.get(id)
 
 		if not horario:
-			response = jsonify({"message": "Horario {} doesn't exist".format(id)})
+			response = jsonify({"message": "Horario {} não existe".format(id)})
 			response.status_code = 404
 			return response
 
@@ -57,7 +57,7 @@ class HorarioResource(Resource):
 		try:
 			horario = Horario.query.get(id)
 			if not horario:
-				response = jsonify({"message": "Horario {} doesn't exist".format(id)})
+				response = jsonify({"message": "Horario {} não existe".format(id)})
 				response.status_code = 404
 				return response
 			horario.delete(horario)
@@ -80,11 +80,11 @@ class HorarioListResource(Resource):
 	def post(self):
 		parser = reqparse.RequestParser()
 
-		parser.add_argument("id_sala", type=int, required=True, location='json')
-		parser.add_argument("hora_inicio", type=str, required=True, location='json')
-		parser.add_argument("hora_fim", type=str, required=True, location='json')
-		parser.add_argument("dia", type=str, required=True, location='json')
-		parser.add_argument("tipo_user", type=str, required=True, location='json')
+		parser.add_argument("id_sala", type=int, required=True, location="json")
+		parser.add_argument("hora_inicio", type=str, required=True, location="json")
+		parser.add_argument("hora_fim", type=str, required=True, location="json")
+		parser.add_argument("dia", type=str, required=True, location="json")
+		parser.add_argument("tipo_user", type=str, required=True, location="json")
 
 		args = parser.parse_args(strict=True)
 		try:
@@ -100,4 +100,4 @@ class HorarioListResource(Resource):
 			resp.status_code = 403
 			return resp
 		else:
-			return schema.dump(query).data, 201, {'location': 'api/v1/horarios/' + str(horario.id)}
+			return schema.dump(query).data, 201, {"location": "api/v1/horarios/" + str(horario.id)}

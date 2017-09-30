@@ -26,4 +26,4 @@ class AdminSchema(Schema):
 	login = fields.String()
 
 	class Meta:
-		type_ = 'admin'
+		type_ = "admin"

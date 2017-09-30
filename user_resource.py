@@ -16,7 +16,7 @@ class UsuarioResource(Resource):
 	def get(self, id):
 		user_query = Usuario.query.get(id)
 		if not user_query:
-			response = jsonify({"message": "Usuario {} doesn't exist".format(id)})
+			response = jsonify({"message": "Usuario {} não existe".format(id)})
 			response.status_code = 404
 			return response
 		return schema.dump(user_query).data
@@ -25,17 +25,17 @@ class UsuarioResource(Resource):
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
-		parser.add_argument("nome", type=str, location='json')
-		parser.add_argument("rfid", type=str, location='json')
-		parser.add_argument("tipo", type=str, location='json')
-		parser.add_argument("email", type=str, location='json')
-		parser.add_argument("direito_acesso", action='append', location='json')
+		parser.add_argument("nome", type=str, location="json")
+		parser.add_argument("rfid", type=str, location="json")
+		parser.add_argument("tipo", type=str, location="json")
+		parser.add_argument("email", type=str, location="json")
+		parser.add_argument("direito_acesso", action="append", location="json")
 
 		args = parser.parse_args(strict=True)
 		user = Usuario.query.get(id)
 
 		if not user:
-			response = jsonify({"message": "Usuario {} doesn't exist".format(id)})
+			response = jsonify({"message": "Usuario {} não existe".format(id)})
 			response.status_code = 404
 			return response
 
@@ -53,7 +53,7 @@ class UsuarioResource(Resource):
 
 
 		# CASO NÃO TENHAM SALAS NO JSON E TENHAM NO BANCO, RETIRAR O ACESSO DE TODAS AS SALAS
-		# banco: [{'id': 1, 'nome': 'E001'}]
+		# banco: [{"id_sala": 1, "nome_sala": "E001"}]
 		# json:  []
 		if not args["direito_acesso"] and user.direito_acesso:
 			try:
@@ -61,7 +61,7 @@ class UsuarioResource(Resource):
 					db.session.query(DireitoAcesso)\
 						.filter(DireitoAcesso.id_usuario == id,
 							DireitoAcesso.id_sala == acesso.id_sala)\
-						.delete(synchronize_session='evaluate')
+						.delete(synchronize_session="evaluate")
 			except SQLAlchemyError as e:
 				db.session.rollback()
 				resp = jsonify({"error": str(e)})
@@ -69,13 +69,13 @@ class UsuarioResource(Resource):
 				return resp
 
 		# CASO HAJAM SALAS NO JSON E NO BANCO
-		# [{'id': 1, 'nome': 'E001'}]
+		# [{"id": 1, "nome": "E001"}]
 		elif args["direito_acesso"]:
-			'''
+			"""
 				args -> contém os IDs das salas passadas no JSON
 				acessos -> contém os IDs das salas do banco
-			'''
-			args = [literal_eval(i)['id'] for i in args["direito_acesso"]]
+			"""
+			args = [literal_eval(i)["id_sala"] for i in args["direito_acesso"]]
 			acessos = [acesso.id_sala for acesso in user.direito_acesso] # acessos do usuário
 			to_add = [id_sala for id_sala in args if id_sala not in acessos]
 			to_remove = [id_sala for id_sala in acessos if id_sala not in args]
@@ -100,7 +100,7 @@ class UsuarioResource(Resource):
 						db.session.query(DireitoAcesso).\
 							filter(DireitoAcesso.id_usuario == id,
 								DireitoAcesso.id_sala == id_sala)\
-							.delete(synchronize_session='evaluate')
+							.delete(synchronize_session="evaluate")
 				except SQLAlchemyError as e:
 					db.session.rollback()
 					resp = jsonify({"error": str(e)})
@@ -115,7 +115,7 @@ class UsuarioResource(Resource):
 		try:
 			user = Usuario.query.get(id)
 			if not user:
-				response = jsonify({"message": "Usuario {} doesn't exist".format(id)})
+				response = jsonify({"message": "Usuario {} não existe".format(id)})
 				response.status_code = 404
 				return response
 			user.delete(user)
@@ -138,12 +138,12 @@ class UsuarioListResource(Resource):
 	# @jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
-		parser.add_argument("nome", type=str, required=True, location='json')
-		parser.add_argument("rfid", type=str, required=True, location='json')
-		parser.add_argument("tipo", type=str, required=True, location='json')
-		parser.add_argument("email", type=str, required=True, location='json')
+		parser.add_argument("nome", type=str, required=True, location="json")
+		parser.add_argument("rfid", type=str, required=True, location="json")
+		parser.add_argument("tipo", type=str, required=True, location="json")
+		parser.add_argument("email", type=str, required=True, location="json")
 
-		parser.add_argument("direito_acesso", action='append', location='json')
+		parser.add_argument("direito_acesso", action="append", location="json")
 		args = parser.parse_args(strict=True)
 
 		try:
@@ -152,9 +152,9 @@ class UsuarioListResource(Resource):
 			if args["direito_acesso"]:
 				try:
 					for sala in args["direito_acesso"]:
-						# [{'id': 1, 'nome': 'E001'}]
+						# [{"id": 1, "nome": "E001"}]
 						sala = literal_eval(sala)
-						acesso = DireitoAcesso(user.id, sala['id'])
+						acesso = DireitoAcesso(user.id, sala["id"])
 						acesso.add(acesso)
 				except SQLAlchemyError as e:
 					db.session.rollback()
@@ -170,4 +170,4 @@ class UsuarioListResource(Resource):
 			return resp
 		else:
 			# 				JSON 		status_code		location
-			return schema.dump(query).data, 201, {'location': 'api/v1/users/' + str(user.id)}
+			return schema.dump(query).data, 201, {"location": "api/v1/users/" + str(user.id)}
