@@ -14,14 +14,14 @@ class AdminResource(Resource):
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("login", type=str, required=True, location='json')
-		parser.add_argument("senha", type=str, required=True, location='json')
+		parser.add_argument("password", type=str, required=True, location='json')
 
 		args = parser.parse_args(strict=True)
 
 		try:
-			admin = Admin(args["login"], args["senha"])
+			admin = Admin(args["login"], args["password"])
 			admin.add(admin)
-			query = Admin.query.get(admin.login)
+			query = Admin.query.get(admin.id)
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			response = jsonify({'message': str(e)})

@@ -13,6 +13,10 @@ class HorarioResource(Resource):
 	# @jwt_required()
 	def get(self, id):
 		horario_query = Horario.query.get(id)
+		if not horario_query:
+			response = jsonify({"message": "Horario {} doesn't exist".format(id)})
+			response.status_code = 404
+			return response
 		result = schema.dump(horario_query).data
 		return result
 
@@ -20,18 +24,13 @@ class HorarioResource(Resource):
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
-		parser.add_argument("nome_sala", type=str, location='json')
 		parser.add_argument("hora_inicio", type=str, location='json')
 		parser.add_argument("hora_fim", type=str, location='json')
 		parser.add_argument("dia", type=str, location='json')
 		parser.add_argument("tipo_user", type=str, location='json')
-		parser.add_argument("sync", type=str, location='json')
 
 		args = parser.parse_args(strict=True)
 		horario = Horario.query.get(id)
-
-		if args["nome_sala"] and args["nome_sala"] != horario.nome_sala:
-			horario.nome_sala = args["nome_sala"]
 
 		if args["hora_inicio"] and args["hora_inicio"] != horario.hora_inicio:
 			horario.hora_inicio = args["hora_inicio"]
@@ -44,9 +43,6 @@ class HorarioResource(Resource):
 
 		if args["tipo_user"] and args["tipo_user"] != horario.tipo_user:
 			horario.tipo_user = args["tipo_user"]
-
-		if args["sync"] and args["sync"] != horario.sync:
-			horario.sync = args["sync"]
 
 		horario.update()
 		return schema.dump(horario).data
@@ -73,24 +69,23 @@ class HorarioListResource(Resource):
 	# @jwt_required()
 	def get(self):
 		horarios_query = Horario.query.all()
-		results = schema.dump(horarios_query, many=True).data
-		return results
+		return schema.dump(horarios_query, many=True).data
 
 	# @jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 
-		parser.add_argument("nome_sala", type=str, required=True, location='json')
+		parser.add_argument("id_sala", type=int, required=True, location='json')
 		parser.add_argument("hora_inicio", type=str, required=True, location='json')
 		parser.add_argument("hora_fim", type=str, required=True, location='json')
 		parser.add_argument("dia", type=str, required=True, location='json')
 		parser.add_argument("tipo_user", type=str, required=True, location='json')
-		parser.add_argument("sync", type=str, required=True, location='json')
 
 		args = parser.parse_args(strict=True)
 		try:
-			horario = Horario(args["nome_sala"], args["hora_inicio"], args["hora_fim"],
-							args["dia"], args["tipo_user"], args["sync"])
+			horario = Horario(args["id_sala"], args["dia"], 
+							args["hora_inicio"], args["hora_fim"],
+							args["tipo_user"])
 			horario.add(horario)
 			query = Horario.query.get(horario.id)
 

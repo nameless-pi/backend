@@ -1,10 +1,11 @@
+from ast import literal_eval
 from flask import jsonify
 from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
 from setup import db
-from acesso_model import Acesso
+from acesso_model import DireitoAcesso
 from user_model import Usuario, UsuarioSchema
 
 schema = UsuarioSchema()
@@ -14,20 +15,27 @@ class UsuarioResource(Resource):
 	# @jwt_required()
 	def get(self, id):
 		user_query = Usuario.query.get(id)
-		result = schema.dump(user_query).data
-		return result
+		if not user_query:
+			response = jsonify({"message": "Usuario {} doesn't exist".format(id)})
+			response.status_code = 404
+			return response
+		return schema.dump(user_query).data
 
 	# @jwt_required()
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
 		parser.add_argument("nome", type=str, location='json')
+		parser.add_argument("rfid", type=str, location='json')
 		parser.add_argument("tipo", type=str, location='json')
 		parser.add_argument("email", type=str, location='json')
-		parser.add_argument("salas", action='append', location='json')
+		parser.add_argument("direito_acesso", action='append', location='json')
 
 		args = parser.parse_args(strict=True)
 		user = Usuario.query.get(id)
+
+		if args["rfid"] and user.rfid != args["rfid"]:
+			user.rfid = args["rfid"]
 
 		if args["nome"] and user.nome != args["nome"]:
 			user.nome = args["nome"]
@@ -38,16 +46,16 @@ class UsuarioResource(Resource):
 		if args["tipo"] and user.tipo != args["tipo"]:
 			user.tipo = args["tipo"]
 
+
 		# CASO NÃO TENHAM SALAS NO JSON E TENHAM NO BANCO, RETIRAR O ACESSO DE TODAS AS SALAS
-		# banco: ["E100", "E007", "E003"]
+		# banco: [{'id': 1, 'nome': 'E001'}]
 		# json:  []
-		if not args["salas"] and user.acessos:
+		if not args["direito_acesso"] and user.direito_acesso:
 			try:
-				for acesso in user.acessos:
-					acesso = Acesso(id, acesso.nome_sala)
-					db.session.query(Acesso).\
-						filter(Acesso.id_usuario == id,
-								Acesso.nome_sala == acesso.nome_sala)\
+				for acesso in user.direito_acesso:
+					db.session.query(DireitoAcesso)\
+						.filter(DireitoAcesso.id_usuario == id,
+							DireitoAcesso.id_sala == acesso.id_sala)\
 						.delete(synchronize_session='evaluate')
 			except SQLAlchemyError as e:
 				db.session.rollback()
@@ -56,16 +64,22 @@ class UsuarioResource(Resource):
 				return resp
 
 		# CASO HAJAM SALAS NO JSON E NO BANCO
-		elif args["salas"]:
-			acessos = [acesso.nome_sala for acesso in user.acessos]
-			to_add = [sala for sala in args["salas"] if sala not in acessos]
-			to_remove = [sala for sala in acessos if sala not in args["salas"]]
+		# [{'id': 1, 'nome': 'E001'}]
+		elif args["direito_acesso"]:
+			'''
+				args -> contém os IDs das salas passadas no JSON
+				acessos -> contém os IDs das salas do banco
+			'''
+			args = [literal_eval(i)['id'] for i in args["direito_acesso"]]
+			acessos = [acesso.id_sala for acesso in user.direito_acesso] # acessos do usuário
+			to_add = [id_sala for id_sala in args if id_sala not in acessos]
+			to_remove = [id_sala for id_sala in acessos if id_sala not in args]
 
 			# NOVO ACESSO
 			if to_add:
 				try:
-					for sala in to_add:
-						acesso = Acesso(id, sala)
+					for id_sala in to_add:
+						acesso = DireitoAcesso(id, id_sala)
 						acesso.add(acesso)
 				except SQLAlchemyError as e:
 					db.session.rollback()
@@ -76,11 +90,11 @@ class UsuarioResource(Resource):
 			# REMOVER ACESSO
 			if to_remove:
 				try:
-					for sala in to_remove:
-						acesso = Acesso(id, sala)
-						db.session.query(Acesso).\
-							filter(Acesso.id_usuario == id,
-								Acesso.nome_sala == sala)\
+					for id_sala in to_remove:
+						acesso = DireitoAcesso(id, id_sala)
+						db.session.query(DireitoAcesso).\
+							filter(DireitoAcesso.id_usuario == id,
+								DireitoAcesso.id_sala == id_sala)\
 							.delete(synchronize_session='evaluate')
 				except SQLAlchemyError as e:
 					db.session.rollback()
@@ -124,16 +138,18 @@ class UsuarioListResource(Resource):
 		parser.add_argument("tipo", type=str, required=True, location='json')
 		parser.add_argument("email", type=str, required=True, location='json')
 
-		parser.add_argument("salas", action='append', location='json')
+		parser.add_argument("direito_acesso", action='append', location='json')
 		args = parser.parse_args(strict=True)
 
 		try:
 			user = Usuario(args["nome"], args["email"], args["rfid"], args["tipo"])
 			user.add(user)
-			if args["salas"]:
+			if args["direito_acesso"]:
 				try:
-					for sala in args["salas"]:
-						acesso = Acesso(user.id, sala)
+					for sala in args["direito_acesso"]:
+						# [{'id': 1, 'nome': 'E001'}]
+						sala = literal_eval(sala)
+						acesso = DireitoAcesso(user.id, sala['id'])
 						acesso.add(acesso)
 				except SQLAlchemyError as e:
 					db.session.rollback()

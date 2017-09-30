@@ -12,3 +12,7 @@ class CRUD():
 	def delete(self, resource):
 		db.session.delete(resource)
 		return db.session.commit()
+
+
+if __name__ == '__main__':
+	pass

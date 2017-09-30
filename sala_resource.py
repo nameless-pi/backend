@@ -11,21 +11,41 @@ schema = SalaSchema()
 
 class SalaResource(Resource):
 	# @jwt_required()
-	def get(self, nome):
-		sala_query = Sala.query.get(nome)
-		result = schema.dump(sala_query).data
-		return result
+	def get(self, id):
+		sala_query = Sala.query.get(id)
+		if not sala_query:
+			response = jsonify({"message": "Sala {} doesn't exist".format(id)})
+			response.status_code = 404
+			return response
+		return schema.dump(sala_query).data
 
 	# @jwt_required()
-	def put(self, nome):
-		pass  # TO DO
+	def put(self, id):
+		parser = reqparse.RequestParser()
+		parser.add_argument("nome", type=str, required=True, location='json')
 
-	# @jwt_required()
-	def delete(self, nome):
+		args = parser.parse_args(strict=True)
+		sala = Sala.query.get(id)
+
+		if sala.nome != args["nome"]:
+			sala.nome = args["nome"]
+
 		try:
-			sala = Sala.query.get(nome)
+			sala.update()
+		except SQLAlchemyError as e:
+			db.session.rollback()
+			resp = jsonify({"error": str(e)})
+			resp.status_code = 403
+			return resp
+		else:
+			return schema.dump(sala).data
+
+	# @jwt_required()
+	def delete(self, id):
+		try:
+			sala = Sala.query.get(id)
 			if not sala:
-				response = jsonify({"message": "Sala {} doesn't exist".format(nome)})
+				response = jsonify({"message": "Sala {} doesn't exist".format(id)})
 				response.status_code = 404
 				return response
 			sala.delete(sala)
@@ -54,7 +74,7 @@ class SalaListResource(Resource):
 		try:
 			sala = Sala(args["nome"])
 			sala.add(sala)
-			query = Sala.query.get(sala.nome)
+			query = Sala.query.order_by(Sala.id.desc()).first()
 
 		except SQLAlchemyError as e:
 			db.session.rollback()
@@ -62,4 +82,4 @@ class SalaListResource(Resource):
 			resp.status_code = 403
 			return resp
 		else:
-			return schema.dump(query).data, 201, {'location': 'api/v1/salas/' + sala.nome}
+			return schema.dump(query).data, 201, {'location': 'api/v1/salas/' + str(query.id)}

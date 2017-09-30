@@ -1,24 +1,25 @@
+from datetime import datetime
 from marshmallow import Schema, fields
 
 from base import db, CRUD
 
 
-class Acesso(db.Model, CRUD):
-	__tablename__ = "acesso"
+class DireitoAcesso(db.Model, CRUD):
+	__tablename__ = "direito_acesso"
 
 	id = db.Column(db.Integer, primary_key=True)
 	id_usuario = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
-	nome_sala = db.Column(db.String(4), db.ForeignKey('sala.nome'), nullable=False)
-	sync = db.Column(db.Boolean, nullable=False)
+	id_sala = db.Column(db.Integer, db.ForeignKey('sala.id'), nullable=False)
+	last_update = db.Column(db.DateTime(), nullable=False)
 
-	def __init__(self, id_usuario, nome_sala):
+	def __init__(self, id_usuario, id_sala):
 		self.id_usuario = id_usuario
-		self.nome_sala = nome_sala
-		self.sync = False
+		self.id_sala = id_sala
+		self.last_update = datetime.now()
 
 
 class AcessoSchema(Schema):
-	nome_sala = fields.String()
+	id_sala = fields.Integer()
 
 	class Meta:
 		type_ = 'acesso'
