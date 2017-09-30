@@ -27,6 +27,11 @@ class SalaResource(Resource):
 		args = parser.parse_args(strict=True)
 		sala = Sala.query.get(id)
 
+		if not sala:
+			response = jsonify({"message": "Sala {} doesn't exist".format(id)})
+			response.status_code = 404
+			return response
+
 		if sala.nome != args["nome"]:
 			sala.nome = args["nome"]
 

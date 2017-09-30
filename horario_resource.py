@@ -32,6 +32,11 @@ class HorarioResource(Resource):
 		args = parser.parse_args(strict=True)
 		horario = Horario.query.get(id)
 
+		if not horario:
+			response = jsonify({"message": "Horario {} doesn't exist".format(id)})
+			response.status_code = 404
+			return response
+
 		if args["hora_inicio"] and args["hora_inicio"] != horario.hora_inicio:
 			horario.hora_inicio = args["hora_inicio"]
 

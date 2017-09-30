@@ -34,6 +34,11 @@ class UsuarioResource(Resource):
 		args = parser.parse_args(strict=True)
 		user = Usuario.query.get(id)
 
+		if not user:
+			response = jsonify({"message": "Usuario {} doesn't exist".format(id)})
+			response.status_code = 404
+			return response
+
 		if args["rfid"] and user.rfid != args["rfid"]:
 			user.rfid = args["rfid"]
 
