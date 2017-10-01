@@ -16,7 +16,7 @@ class Horario(db.Model, CRUD):
 	tipo_user = db.Column(db.Enum(TipoUsuario), nullable=False)
 	id_sala = db.Column(db.Integer, db.ForeignKey("sala.id"), nullable=False)
 
-	def __init__(self, id_sala, dia, hora_fim, hora_inicio, tipo_user):
+	def __init__(self, id_sala, dia, hora_inicio, hora_fim, tipo_user):
 		self.id_sala = id_sala
 		self.dia = dia
 		self.hora_inicio = hora_inicio

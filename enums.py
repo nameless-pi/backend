@@ -4,23 +4,22 @@ from marshmallow import fields
 
 class EnumDia(fields.Field):
 	def _serialize(self, value, attr, obj):
-		print('VALOOOR ->', value)
 		if value is None:
 			return ""
 		if value == Dia.domingo:
-			return "Domingo"
+			return "domingo"
 		elif value == Dia.segunda:
-			return "Segunda-Feira"
+			return "segunda"
 		elif value == Dia.terca:
-			return "Terça-Feira"
+			return "terca"
 		elif value == Dia.quarta:
-			return "Quarta-Feira"
+			return "quarta"
 		elif value == Dia.quinta:
-			return "Quinta-Feira"
+			return "quinta"
 		elif value == Dia.sexta:
-			return "Sexta-Feira"
+			return "sexta"
 		elif value == Dia.sabado:
-			return "Sábado"
+			return "sabado"
 
 
 class Dia(enum.Enum):
@@ -39,11 +38,11 @@ class EnumTipo(fields.Field):
 		if value is None:
 			return ""
 		if value == TipoUsuario.aluno:
-			return "Aluno"
+			return "aluno"
 		elif value == TipoUsuario.professor:
-			return "Professor"
+			return "professor"
 		elif value == TipoUsuario.servente:
-			return "Servente"
+			return "servente"
 
 
 class TipoUsuario(enum.Enum):
@@ -58,9 +57,9 @@ class EnumEvento(fields.Field):
 		if value is None:
 			return ""
 		if value == Evento.entrada:
-			return "Entrada"
+			return "entrada"
 		elif value == Evento.saida:
-			return "Saída"
+			return "saida"
 
 
 class Evento(enum.Enum):

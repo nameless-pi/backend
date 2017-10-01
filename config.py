@@ -1,7 +1,7 @@
 # Flask
 DEBUG = True
 PORT = 5000
-HOST = "0.0.0.0"
+HOST = "localhost"
 SECRET_KEY = "a1841b5ef57d8de68b17203721a8b094f05e1e319bf23aeb"
 
 # SQLAlchemy
