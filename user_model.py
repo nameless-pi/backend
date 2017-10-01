@@ -1,10 +1,8 @@
 from datetime import datetime
 from marshmallow import Schema, fields
-from marshmallow_enum import EnumField
-
 
 from base import CRUD, db
-from enums import TipoUsuario
+from enums import TipoUsuario, EnumTipo
 from acesso_model import AcessoSchema
 
 
@@ -32,7 +30,7 @@ class UsuarioSchema(Schema):
 	nome = fields.String()
 	email = fields.String()
 	rfid = fields.String()
-	tipo = EnumField(TipoUsuario)
+	tipo = EnumTipo()
 	last_update = fields.DateTime()
 	direito_acesso = fields.Nested(AcessoSchema, many=True)
 

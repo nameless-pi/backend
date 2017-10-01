@@ -1,9 +1,8 @@
 from datetime import datetime
 from marshmallow import Schema, fields
-from marshmallow_enum import EnumField
 
 from base import CRUD, db
-from enums import Dia, TipoUsuario
+from enums import Dia, TipoUsuario, EnumDia, EnumTipo
 
 
 class Horario(db.Model, CRUD):
@@ -31,8 +30,8 @@ class HorarioSchema(Schema):
 	id_sala = fields.Integer()
 	hora_inicio = fields.Time()
 	hora_fim = fields.Time()
-	dia = EnumField(Dia)
-	tipo_user = EnumField(TipoUsuario)
+	dia = EnumDia()
+	tipo_user = EnumTipo()
 	last_update = fields.DateTime()
 
 	class Meta:
