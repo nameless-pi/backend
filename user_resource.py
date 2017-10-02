@@ -12,7 +12,7 @@ schema = UsuarioSchema()
 
 
 class UsuarioResource(Resource):
-	# @jwt_required()
+	@jwt_required()
 	def get(self, id):
 		user_query = Usuario.query.get(id)
 		if not user_query:
@@ -21,7 +21,7 @@ class UsuarioResource(Resource):
 			return response
 		return schema.dump(user_query).data
 
-	# @jwt_required()
+	@jwt_required()
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
@@ -40,13 +40,23 @@ class UsuarioResource(Resource):
 			return response
 
 		if args["rfid"] and user.rfid != args["rfid"]:
-			user.rfid = args["rfid"]
+			if db.session.query(Usuario).filter(Usuario.rfid == args["rfid"]).all():
+				response = jsonify({"message": "RFID existente"})
+				response.status_code = 403
+				return response
+			else:
+				user.rfid = args["rfid"]
 
 		if args["nome"] and user.nome != args["nome"]:
 			user.nome = args["nome"]
 
 		if args["email"] and user.email != args["email"]:
-			user.email = args["email"]
+			if db.session.query(Usuario).filter(Usuario.email == args["email"]).all():
+				response = jsonify({"message": "Email existente"})
+				response.status_code = 403
+				return response
+			else:
+				user.email = args["email"]
 
 		if args["tipo"] and user.tipo != args["tipo"]:
 			user.tipo = args["tipo"]
@@ -76,7 +86,7 @@ class UsuarioResource(Resource):
 				acessos -> contém os IDs das salas do banco
 			"""
 			args = [literal_eval(i)["id_sala"] for i in args["direito_acesso"]]
-			acessos = [acesso.id_sala for acesso in user.direito_acesso] # acessos do usuário
+			acessos = [acesso.id_sala for acesso in user.direito_acesso] #  acessos do usuário
 			to_add = [id_sala for id_sala in args if id_sala not in acessos]
 			to_remove = [id_sala for id_sala in acessos if id_sala not in args]
 
@@ -106,11 +116,10 @@ class UsuarioResource(Resource):
 					resp = jsonify({"error": str(e)})
 					resp.status_code = 403
 					return resp
-
 		user.update()
 		return schema.dump(user).data
 
-	# @jwt_required()
+	@jwt_required()
 	def delete(self, id):
 		try:
 			user = Usuario.query.get(id)
@@ -129,13 +138,13 @@ class UsuarioResource(Resource):
 
 
 class UsuarioListResource(Resource):
-	# @jwt_required()
+	@jwt_required()
 	def get(self):
 		users_query = Usuario.query.all()
 		results = schema.dump(users_query, many=True).data
 		return results
 
-	# @jwt_required()
+	@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location="json")

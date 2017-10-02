@@ -6,18 +6,20 @@ from horario_resource import HorarioResource, HorarioListResource
 from json_resource import JSONResource
 
 
-api.add_resource(AdminResource, "/admins")
+prefix = "/api/v1"
 
-api.add_resource(UsuarioResource, "/users/<int:id>")
-api.add_resource(UsuarioListResource, "/users")
+api.add_resource(AdminResource, prefix + "/admins")
 
-api.add_resource(SalaResource, "/salas/<int:id>")
-api.add_resource(SalaListResource, "/salas")
+api.add_resource(UsuarioResource, prefix + "/users/<int:id>")
+api.add_resource(UsuarioListResource, prefix + "/users")
 
-api.add_resource(HorarioResource, "/horarios/<int:id>")
-api.add_resource(HorarioListResource, "/horarios")
+api.add_resource(SalaResource, prefix + "/salas/<int:id>")
+api.add_resource(SalaListResource, prefix + "/salas")
 
-api.add_resource(JSONResource, "/json/<string:tipo>")
+api.add_resource(HorarioResource, prefix + "/horarios/<int:id>")
+api.add_resource(HorarioListResource, prefix + "/horarios")
+
+api.add_resource(JSONResource, prefix + "/json/<string:tipo>")
 
 if __name__ == "__main__":
 	app.run(host=app.config["HOST"],
