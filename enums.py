@@ -6,54 +6,52 @@ class EnumDia(fields.Field):
 	def _serialize(self, value, attr, obj):
 		if value is None:
 			return ""
-		if value == Dia.domingo:
-			return "domingo"
-		elif value == Dia.segunda:
-			return "segunda"
-		elif value == Dia.terca:
-			return "terca"
-		elif value == Dia.quarta:
-			return "quarta"
-		elif value == Dia.quinta:
-			return "quinta"
-		elif value == Dia.sexta:
-			return "sexta"
-		elif value == Dia.sabado:
-			return "sabado"
+		if value == Dia.Domingo:
+			return "Domingo"
+		elif value == Dia.Segunda:
+			return "Segunda"
+		elif value == Dia.Terca:
+			return "Terca"
+		elif value == Dia.Quarta:
+			return "Quarta"
+		elif value == Dia.Quinta:
+			return "Quinta"
+		elif value == Dia.Sexta:
+			return "Sexta"
+		elif value == Dia.Sabado:
+			return "Sabado"
 
 
 class Dia(enum.Enum):
-	domingo = 1
-	segunda = 2
-	terca = 3
-	quarta = 4
-	quinta = 5
-	sexta = 6
-	sabado = 7
+	Domingo = 1
+	Segunda = 2
+	Terca = 3
+	Quarta = 4
+	Quinta = 5
+	Sexta = 6
+	Sabado = 7
 
 
 class EnumTipo(fields.Field):
 	def _serialize(self, value, attr, obj):
-		print('VALOOOR ->', value)
 		if value is None:
 			return ""
-		if value == TipoUsuario.aluno:
-			return "aluno"
-		elif value == TipoUsuario.professor:
-			return "professor"
-		elif value == TipoUsuario.servente:
-			return "servente"
+		if value == TipoUsuario.Aluno:
+			return "Aluno"
+		elif value == TipoUsuario.Professor:
+			return "Professor"
+		elif value == TipoUsuario.Servente:
+			return "Servente"
 
 
 class TipoUsuario(enum.Enum):
-	aluno = 1
-	professor = 2
-	servente = 3
+	Aluno = 1
+	Professor = 2
+	Servente = 3
 
 
 class EnumEvento(fields.Field):
 	def _serialize(self, value, attr, obj):
-		print('VALOOOR ->', value)
 		if value is None:
 			return ""
 		if value == Evento.entrada:

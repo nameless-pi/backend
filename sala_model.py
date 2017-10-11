@@ -8,7 +8,7 @@ class Sala(db.Model, CRUD):
 	__tablename__ = "sala"
 
 	id = db.Column(db.Integer, primary_key=True)
-	nome = db.Column(db.String(4), unique=True)
+	nome = db.Column(db.String(20), unique=True)
 	horarios = db.relationship("Horario", cascade="delete")
 	acesso = db.relationship("DireitoAcesso", cascade="delete")
 
