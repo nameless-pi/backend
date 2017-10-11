@@ -10,7 +10,7 @@ schema = AdminSchema()
 
 
 class AdminResource(Resource):
-	# @jwt_required()
+	@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("login", type=str, required=True, location="json")

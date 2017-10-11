@@ -180,3 +180,15 @@ class UsuarioListResource(Resource):
 		else:
 			# 				JSON 		status_code		location
 			return schema.dump(query).data, 201, {"location": "api/v1/users/" + str(user.id)}
+
+	@jwt_required()
+	def delete(self):
+		try:
+			Usuario.query.delete()
+		except SQLAlchemyError as e:
+			db.session.rollback()
+			resp = jsonify({"error": str(e)})
+			resp.status_code = 403
+			return resp
+		else:
+			return None, 204

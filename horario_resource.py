@@ -28,6 +28,7 @@ class HorarioResource(Resource):
 		parser.add_argument("hora_fim", type=str, location="json")
 		parser.add_argument("dia", type=str, location="json")
 		parser.add_argument("tipo_user", type=str, location="json")
+		parser.add_argument("id_sala", type=str, location="json")
 
 		args = parser.parse_args(strict=True)
 		horario = Horario.query.get(id)
@@ -35,6 +36,19 @@ class HorarioResource(Resource):
 		if not horario:
 			response = jsonify({"message": "Horario {} não existe".format(id)})
 			response.status_code = 404
+			return response
+
+		horario_check = db.session.query(Horario)\
+			.filter(Horario.id_sala == args["id_sala"],
+					Horario.dia == args["dia"],
+					Horario.tipo_user == args["tipo_user"],
+					Horario.hora_inicio == args["hora_inicio"],
+					Horario.hora_fim == args["hora_fim"]).all()
+
+		if horario_check:
+			print(horario_check)
+			response = jsonify({"message": "Horário existente"})
+			response.status_code = 403
 			return response
 
 		if args["hora_inicio"] and args["hora_inicio"] != horario.hora_inicio:
@@ -87,10 +101,23 @@ class HorarioListResource(Resource):
 		parser.add_argument("tipo_user", type=str, required=True, location="json")
 
 		args = parser.parse_args(strict=True)
-		try:
+
+		horario_check = db.session.query(Horario)\
+			.filter(Horario.id_sala == args["id_sala"],
+					Horario.dia == args["dia"],
+					Horario.tipo_user == args["tipo_user"],
+					Horario.hora_inicio == args["hora_inicio"],
+					Horario.hora_fim == args["hora_fim"]).all()
+
+		if horario_check:
+			response = jsonify({"message": "Horário existente"})
+			response.status_code = 403
+			return response
+
+		try:			
 			horario = Horario(args["id_sala"], args["dia"], 
-							args["hora_inicio"], args["hora_fim"],
-							args["tipo_user"])
+				args["hora_inicio"], args["hora_fim"],
+				args["tipo_user"])
 			horario.add(horario)
 			query = Horario.query.get(horario.id)
 
@@ -101,3 +128,15 @@ class HorarioListResource(Resource):
 			return resp
 		else:
 			return schema.dump(query).data, 201, {"location": "api/v1/horarios/" + str(horario.id)}
+
+	@jwt_required()
+	def delete(self):
+		try:
+			Horario.query.delete()
+		except SQLAlchemyError as e:
+			db.session.rollback()
+			resp = jsonify({"error": str(e)})
+			resp.status_code = 403
+			return resp
+		else:
+			return None, 204
