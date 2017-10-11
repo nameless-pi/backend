@@ -128,15 +128,3 @@ class HorarioListResource(Resource):
 			return resp
 		else:
 			return schema.dump(query).data, 201, {"location": "api/v1/horarios/" + str(horario.id)}
-
-	@jwt_required()
-	def delete(self):
-		try:
-			Horario.query.delete()
-		except SQLAlchemyError as e:
-			db.session.rollback()
-			resp = jsonify({"error": str(e)})
-			resp.status_code = 403
-			return resp
-		else:
-			return None, 204

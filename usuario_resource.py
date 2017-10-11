@@ -6,7 +6,7 @@ from flask_restful import Resource, reqparse
 
 from setup import db
 from acesso_model import DireitoAcesso
-from user_model import Usuario, UsuarioSchema
+from usuario_model import Usuario, UsuarioSchema
 
 schema = UsuarioSchema()
 
@@ -178,13 +178,13 @@ class UsuarioListResource(Resource):
 			resp.status_code = 403
 			return resp
 		else:
-			# 				JSON 		status_code		location
-			return schema.dump(query).data, 201, {"location": "api/v1/usuario/" + str(user.id)}
+			return schema.dump(query).data, 201, {"location": "api/v1/usuarios/" + str(user.id)}
 
 	@jwt_required()
 	def delete(self):
 		try:
 			Usuario.query.delete()
+			db.session.commit()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})

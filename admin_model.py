@@ -8,10 +8,12 @@ class Admin(db.Model, CRUD):
 	__tablename__ = "admin"
 
 	id = db.Column(db.Integer, primary_key=True)
+	nome = db.Column(db.String(80), nullable=False)
 	login = db.Column(db.String(80), nullable=False, unique=True)
 	password = db.Column(db.String(128), nullable=False)
 
-	def __init__(self, login, password):
+	def __init__(self, nome, login, password):
+		self.nome = nome
 		self.login = login
 		self.password = pwd_context.encrypt(password)
 
@@ -23,6 +25,7 @@ class Admin(db.Model, CRUD):
 
 
 class AdminSchema(Schema):
+	nome = fields.String()
 	login = fields.String()
 
 	class Meta:

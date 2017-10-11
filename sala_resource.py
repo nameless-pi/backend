@@ -5,8 +5,27 @@ from flask_restful import Resource, reqparse
 
 from setup import db
 from sala_model import Sala, SalaSchema
+from horario_model import Horario
 
 schema = SalaSchema()
+
+
+class SalaHorarioResource(Resource):
+	@jwt_required()
+	def delete(self, id):
+		try:
+			query = db.session.query(Horario).filter(Horario.id_sala == id)#.delete()
+			print('QUERY ->', query)
+			[db.session.delete(i) for i in query]
+			# query.delete()
+			db.session.commit()
+		except SQLAlchemyError as e:
+			db.session.rollback()
+			resp = jsonify({"error": str(e)})
+			resp.status_code = 403
+			return resp
+		else:
+			return None, 204
 
 
 class SalaResource(Resource):
@@ -93,6 +112,7 @@ class SalaListResource(Resource):
 	def delete(self):
 		try:
 			Sala.query.delete()
+			db.session.commit()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})
