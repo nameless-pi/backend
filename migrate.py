@@ -3,7 +3,7 @@ from flask_migrate import Migrate, MigrateCommand
 
 from setup import app, db
 from models import *
-from user_model import Usuario
+from usuario_model import Usuario
 from horario_model import Horario
 from sala_model import Sala
 from acesso_model import DireitoAcesso

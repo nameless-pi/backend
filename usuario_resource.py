@@ -179,7 +179,7 @@ class UsuarioListResource(Resource):
 			return resp
 		else:
 			# 				JSON 		status_code		location
-			return schema.dump(query).data, 201, {"location": "api/v1/users/" + str(user.id)}
+			return schema.dump(query).data, 201, {"location": "api/v1/usuario/" + str(user.id)}
 
 	@jwt_required()
 	def delete(self):

@@ -1,5 +1,5 @@
 from setup import api, app
-from admin_resource import AdminResource
+from admin_resource import AdminResource, AdminListResource
 from sala_resource import SalaResource, SalaListResource
 from user_resource import UsuarioResource, UsuarioListResource
 from horario_resource import HorarioResource, HorarioListResource
@@ -8,10 +8,11 @@ from json_resource import JSONResource
 
 prefix = "/api/v1"
 
-api.add_resource(AdminResource, prefix + "/admins")
+api.add_resource(AdminResource, prefix + "/admins/<int:id>")
+api.add_resource(AdminListResource, prefix + "/admins")
 
-api.add_resource(UsuarioResource, prefix + "/users/<int:id>")
-api.add_resource(UsuarioListResource, prefix + "/users")
+api.add_resource(UsuarioResource, prefix + "/usuarios/<int:id>")
+api.add_resource(UsuarioListResource, prefix + "/usuarios")
 
 api.add_resource(SalaResource, prefix + "/salas/<int:id>")
 api.add_resource(SalaListResource, prefix + "/salas")
