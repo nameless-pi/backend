@@ -61,17 +61,12 @@ class UsuarioResource(Resource):
 		if args["tipo"] and user.tipo != args["tipo"]:
 			user.tipo = args["tipo"]
 
-
-		# CASO NÃO TENHAM SALAS NO JSON E TENHAM NO BANCO, RETIRAR O ACESSO DE TODAS AS SALAS
-		# banco: [{"id_sala": 1, "nome_sala": "E001"}]
-		# json:  []
+		# CASO NÃO TENHAM SALAS NO JSON, RETIRAR O ACESSO DE TODAS AS SALAS
 		if not args["direito_acesso"] and user.direito_acesso:
 			try:
-				for acesso in user.direito_acesso:
-					db.session.query(DireitoAcesso)\
-						.filter(DireitoAcesso.id_usuario == id,
-							DireitoAcesso.id_sala == acesso.id_sala)\
-						.delete(synchronize_session="evaluate")
+				db.session.query(DireitoAcesso)\
+					.filter(DireitoAcesso.id_usuario == id)\
+					.delete(synchronize_session="evaluate")
 			except SQLAlchemyError as e:
 				db.session.rollback()
 				resp = jsonify({"error": str(e)})
@@ -83,39 +78,29 @@ class UsuarioResource(Resource):
 		elif args["direito_acesso"]:
 			"""
 				args -> contém os IDs das salas passadas no JSON
-				acessos -> contém os IDs das salas do banco
 			"""
 			args = [literal_eval(i)["id_sala"] for i in args["direito_acesso"]]
-			acessos = [acesso.id_sala for acesso in user.direito_acesso] #  acessos do usuário
-			to_add = [id_sala for id_sala in args if id_sala not in acessos]
-			to_remove = [id_sala for id_sala in acessos if id_sala not in args]
 
-			# NOVO ACESSO
-			if to_add:
-				try:
-					for id_sala in to_add:
-						acesso = DireitoAcesso(id, id_sala)
-						acesso.add(acesso)
-				except SQLAlchemyError as e:
-					db.session.rollback()
-					resp = jsonify({"error": str(e)})
-					resp.status_code = 403
-					return resp
+			try:
+				db.session.query(DireitoAcesso)\
+					.filter(DireitoAcesso.id_usuario == id)\
+					.delete(synchronize_session="evaluate")
+			except SQLAlchemyError as e:
+				db.session.rollback()
+				resp = jsonify({"error": str(e)})
+				resp.status_code = 403
+				return resp
 
-			# REMOVER ACESSO
-			if to_remove:
-				try:
-					for id_sala in to_remove:
-						acesso = DireitoAcesso(id, id_sala)
-						db.session.query(DireitoAcesso).\
-							filter(DireitoAcesso.id_usuario == id,
-								DireitoAcesso.id_sala == id_sala)\
-							.delete(synchronize_session="evaluate")
-				except SQLAlchemyError as e:
-					db.session.rollback()
-					resp = jsonify({"error": str(e)})
-					resp.status_code = 403
-					return resp
+			try:
+				for id_sala in args:
+					acesso = DireitoAcesso(id, id_sala)
+					acesso.add(acesso)
+			except SQLAlchemyError as e:
+				db.session.rollback()
+				resp = jsonify({"error": str(e)})
+				resp.status_code = 403
+				return resp
+
 		user.update()
 		return schema.dump(user).data
 
@@ -182,7 +167,16 @@ class UsuarioListResource(Resource):
 
 	@jwt_required()
 	def delete(self):
+		'''
+			Primeiro remover as dependências na tabela direito_acesso,
+			depois remover da tabela usuario
+		'''
 		try:
+			ids = [i[0] for i in db.session.query(Usuario.id).all()]
+			for id in ids:
+				db.session.query(DireitoAcesso)\
+					.filter(DireitoAcesso.id_usuario == id)\
+					.delete(synchronize_session="evaluate")
 			Usuario.query.delete()
 			db.session.commit()
 		except SQLAlchemyError as e:

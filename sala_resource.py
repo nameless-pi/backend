@@ -14,10 +14,9 @@ class SalaHorarioResource(Resource):
 	@jwt_required()
 	def delete(self, id):
 		try:
-			query = db.session.query(Horario).filter(Horario.id_sala == id)#.delete()
-			print('QUERY ->', query)
-			[db.session.delete(i) for i in query]
-			# query.delete()
+			db.session.query(Horario)\
+				.filter(Horario.id_sala == id)\
+				.delete(synchronize_session="evaluate")
 			db.session.commit()
 		except SQLAlchemyError as e:
 			db.session.rollback()
