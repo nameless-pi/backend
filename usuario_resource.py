@@ -148,7 +148,7 @@ class UsuarioListResource(Resource):
 					for sala in args["direito_acesso"]:
 						# [{"id": 1, "nome": "E001"}]
 						sala = literal_eval(sala)
-						acesso = DireitoAcesso(user.id, sala["id"])
+						acesso = DireitoAcesso(user.id, sala["id_sala"])
 						acesso.add(acesso)
 				except SQLAlchemyError as e:
 					db.session.rollback()
