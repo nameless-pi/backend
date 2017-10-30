@@ -4,6 +4,10 @@ from sala_resource import SalaResource, SalaListResource, SalaHorarioResource
 from usuario_resource import UsuarioResource, UsuarioListResource
 from horario_resource import HorarioResource, HorarioListResource
 from json_resource import JSONResource
+from rasp_rfid_resource import RaspRfidResource
+from rasp_horario_resource import RaspHorarioResource
+from rasp_check_evento_resource import RaspCheckEventoResource
+from rasp_evento_resource import RaspEventoResource
 
 
 prefix = "/api/v1"
@@ -22,6 +26,11 @@ api.add_resource(HorarioResource, prefix + "/horarios/<int:id>")
 api.add_resource(HorarioListResource, prefix + "/horarios")
 
 api.add_resource(JSONResource, prefix + "/json/<string:tipo>")
+
+api.add_resource(RaspRfidResource, prefix + "/rasp/rfid")
+api.add_resource(RaspHorarioResource, prefix + "/rasp/horario")
+api.add_resource(RaspCheckEventoResource, prefix + "/rasp/checkevento")
+api.add_resource(RaspEventoResource, prefix + "/rasp/evento")
 
 if __name__ == "__main__":
 	app.run(host=app.config["HOST"],

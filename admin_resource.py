@@ -10,15 +10,15 @@ schema = AdminSchema()
 
 
 class AdminResource(Resource):
-	@jwt_required()
+	#@jwt_required()
 	def get(self, id):
 		pass
 
-	@jwt_required()
+	#@jwt_required()
 	def put(self, id):
 		pass
 
-	@jwt_required()
+	#@jwt_required()
 	def delete(self, id):
 		try:
 			admin = Admin.query.get(id)
@@ -37,7 +37,7 @@ class AdminResource(Resource):
 
 
 class AdminListResource(Resource):
-	@jwt_required()
+	#@jwt_required()
 	def get(self):
 		try:
 			admins = Admin.query.all()

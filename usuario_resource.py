@@ -12,7 +12,7 @@ schema = UsuarioSchema()
 
 
 class UsuarioResource(Resource):
-	@jwt_required()
+	#@jwt_required()
 	def get(self, id):
 		user_query = Usuario.query.get(id)
 		if not user_query:
@@ -21,7 +21,7 @@ class UsuarioResource(Resource):
 			return response
 		return schema.dump(user_query).data
 
-	@jwt_required()
+	#@jwt_required()
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
@@ -104,7 +104,7 @@ class UsuarioResource(Resource):
 		user.update()
 		return schema.dump(user).data
 
-	@jwt_required()
+	#@jwt_required()
 	def delete(self, id):
 		try:
 			user = Usuario.query.get(id)
@@ -123,13 +123,13 @@ class UsuarioResource(Resource):
 
 
 class UsuarioListResource(Resource):
-	@jwt_required()
+	#@jwt_required()
 	def get(self):
 		users_query = Usuario.query.all()
 		results = schema.dump(users_query, many=True).data
 		return results
 
-	@jwt_required()
+	#@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location="json")
@@ -165,7 +165,7 @@ class UsuarioListResource(Resource):
 		else:
 			return schema.dump(query).data, 201, {"location": "api/v1/usuarios/" + str(user.id)}
 
-	@jwt_required()
+	#@jwt_required()
 	def delete(self):
 		'''
 			Primeiro remover as dependências na tabela direito_acesso,

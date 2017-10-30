@@ -2,7 +2,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
 from setup import app, db
-from models import *
+from evento_model import Evento
 from usuario_model import Usuario
 from horario_model import Horario
 from sala_model import Sala

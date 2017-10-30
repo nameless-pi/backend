@@ -34,3 +34,12 @@ class AcessoSchema(Schema):
 
 	class Meta:
 		type_ = "acesso"
+
+class AcessoSchemaRasp(Schema):
+	id_sala = fields.Integer()
+	nome_sala = CustomSchema()
+	last_update = fields.DateTime()
+	id_usuario = fields.Integer()
+
+	class Meta:
+		type_ = "acessorasp"
