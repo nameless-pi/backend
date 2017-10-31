@@ -25,6 +25,7 @@ class Admin(db.Model, CRUD):
 
 
 class AdminSchema(Schema):
+	id = fields.Integer()
 	nome = fields.String()
 	login = fields.String()
 
