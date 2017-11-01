@@ -4,6 +4,8 @@ from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
+from datetime import datetime
+
 from setup import db
 from acesso_model import DireitoAcesso
 from usuario_model import Usuario, UsuarioSchema
@@ -12,16 +14,16 @@ schema = UsuarioSchema()
 
 
 class UsuarioResource(Resource):
-	#@jwt_required()
+	@jwt_required()
 	def get(self, id):
 		user_query = Usuario.query.get(id)
-		if not user_query:
+		if user_query.alive == False:
 			response = jsonify({"message": "Usuario {} não existe".format(id)})
 			response.status_code = 404
 			return response
 		return schema.dump(user_query).data
 
-	#@jwt_required()
+	@jwt_required()
 	def put(self, id):
 		parser = reqparse.RequestParser()
 
@@ -34,7 +36,7 @@ class UsuarioResource(Resource):
 		args = parser.parse_args(strict=True)
 		user = Usuario.query.get(id)
 
-		if not user:
+		if user.alive == False:
 			response = jsonify({"message": "Usuario {} não existe".format(id)})
 			response.status_code = 404
 			return response
@@ -100,19 +102,21 @@ class UsuarioResource(Resource):
 				resp = jsonify({"error": str(e)})
 				resp.status_code = 403
 				return resp
-
-		user.update()
+		user.last_update = datetime.now()
+		ser.update()
 		return schema.dump(user).data
 
-	#@jwt_required()
+	@jwt_required()
 	def delete(self, id):
 		try:
 			user = Usuario.query.get(id)
-			if not user:
+			if user.alive == False:
 				response = jsonify({"message": "Usuario {} não existe".format(id)})
 				response.status_code = 404
 				return response
-			user.delete(user)
+			user.alive = False
+			user.last_update = datetime.now()
+			user.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})
@@ -123,13 +127,13 @@ class UsuarioResource(Resource):
 
 
 class UsuarioListResource(Resource):
-	#@jwt_required()
+	@jwt_required()
 	def get(self):
-		users_query = Usuario.query.all()
+		users_query = Usuario.query.filter(Usuario.alive == True).all()
 		results = schema.dump(users_query, many=True).data
 		return results
 
-	#@jwt_required()
+	@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location="json")
@@ -165,7 +169,7 @@ class UsuarioListResource(Resource):
 		else:
 			return schema.dump(query).data, 201, {"location": "api/v1/usuarios/" + str(user.id)}
 
-	#@jwt_required()
+	@jwt_required()
 	def delete(self):
 		'''
 			Primeiro remover as dependências na tabela direito_acesso,
@@ -177,8 +181,9 @@ class UsuarioListResource(Resource):
 				db.session.query(DireitoAcesso)\
 					.filter(DireitoAcesso.id_usuario == id)\
 					.delete(synchronize_session="evaluate")
-			Usuario.query.delete()
-			db.session.commit()
+			Usuario.alive = False
+			Usuario.last_update = datetime.now()
+			Usuario.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})

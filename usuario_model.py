@@ -16,13 +16,16 @@ class Usuario(db.Model, CRUD):
 	rfid = db.Column(db.String(16), nullable=False, unique=True)
 	direito_acesso = db.relationship("DireitoAcesso", cascade="delete")
 	last_update = db.Column(db.DateTime(), nullable=False)
+	alive = db.Column(db.Boolean, nullable=False)
 
 	def __init__(self, nome, email, rfid, tipo):
 		self.nome = nome
 		self.email = email
 		self.rfid = rfid
 		self.tipo = tipo
+		self.alive = True
 		self.last_update = datetime.now()
+
 
 
 class UsuarioSchema(Schema):
@@ -33,6 +36,7 @@ class UsuarioSchema(Schema):
 	tipo = EnumTipo()
 	last_update = fields.DateTime()
 	direito_acesso = fields.Nested(AcessoSchema, many=True)
+	alive = fields.Boolean()
 
 	class Meta:
 		type_ = "usuario"
