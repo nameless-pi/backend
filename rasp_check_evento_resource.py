@@ -18,13 +18,9 @@ class RaspCheckEventoResource(Resource):
 
         sala = args["sala"]
 
-        sala_query = Sala.query.all()
-        salas = schema2.dump(sala_query, many=True).data
-        for s in salas:
-            if s["nome"] == sala:
-                id_sala = s["id"]
-        
-        
+        sala_query = Sala.query.filter(Sala.nome == sala).first()
+        salas = schema2.dump(sala_query).data
+        id_sala = salas["id"]        
 
         evento_query = Evento.query.filter(Evento.id_sala == id_sala).order_by(desc(Evento.horario)).first()
         eventos = schema.dump(evento_query).data
@@ -34,5 +30,4 @@ class RaspCheckEventoResource(Resource):
         else:
             results.append({"horario": eventos["horario"]})
         
-        print(results)
         return (results)

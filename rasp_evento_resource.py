@@ -3,7 +3,6 @@ from flask_restful import Resource, reqparse
 import dateutil.parser
 from sqlalchemy import desc
 from sqlalchemy.exc import SQLAlchemyError
-import dateutil.parser
 
 from setup import db
 from evento_model import Evento, EventoSchema
@@ -22,25 +21,14 @@ class RaspEventoResource(Resource):
         parser.add_argument("horario", type=str, required=True, location="json")
         parser.add_argument("sala", type=str, required=True, location="json")
         args = parser.parse_args(strict=True)
+        
+        sala_query = Sala.query.filter(Sala.nome == args["sala"]).first()
+        sala = schema2.dump(sala_query).data
+        id_sala = sala["id"]
 
-        print(args)
-
-
-        sala_query = Sala.query.all()
-        sala = schema2.dump(sala_query, many=True).data
-        id_sala = 0
-        for s in sala:
-            if s["nome"] == args["sala"]:
-                id_sala = s["id"]
-        print(id_sala)
-
-        usuario_query = Usuario.query.all()
-        usuario = schema3.dump(usuario_query, many=True).data
-        id_usuario = 0
-        for u in usuario:
-            if u["rfid"] == args["rfid"]:
-                id_usuario = u["id"]
-        print(id_usuario)
+        usuario_query = Usuario.query.filter(Usuario.rfid == args["rfid"]).first()
+        usuario = schema3.dump(usuario_query).data
+        id_usuario = usuario["id"]
         
         try:
             evento = Evento(args["evento"], dateutil.parser.parse(args["horario"]), id_usuario, id_sala)

@@ -18,33 +18,35 @@ class RaspHorarioResource(Resource):
 
         sala = args["sala"]
         hora = dateutil.parser.parse(args["last_update"])
-        print(hora)
 
-        sala_query = Sala.query.all()
-        salas = schema2.dump(sala_query, many=True).data
-        for s in salas:
-            if s["nome"] == sala:
-                id_sala = s["id"]
-                print(id_sala)
-        print(id_sala)
+        sala_query = Sala.query.filter(Sala.nome == sala).first()
+        salas = schema2.dump(sala_query).data
+        id_sala = salas["id"]
         
-        
-        horario_query = Horario.query.all()
+        results = {}
+        horario_query = Horario.query.filter(Horario.last_update > hora).filter(Horario.alive == True).filter(Horario.id_sala == id_sala)
         horarios = schema.dump(horario_query, many=True).data
-        print(horarios)
-        results = []
+        results_novos = []
         for h in horarios:
-            if (h["id_sala"] == id_sala) and (dateutil.parser.parse(h["last_update"]) > hora):
-                adicionar = {}
-                adicionar.update({"dia":h["dia"]})
-                adicionar.update({"hora_inicio":h["hora_inicio"]})
-                adicionar.update({"hora_fim":h["hora_fim"]})
-                adicionar.update({"tipo_usuario":h["tipo_user"]})
-                adicionar.update({"last_update":h["last_update"]})
-                results.append(adicionar)
-                adicionar = {}
-        print("\n")
-        print(results)
-        print("\n")
-        
+            adicionar = {}
+            adicionar.update({"dia":h["dia"]})
+            adicionar.update({"hora_inicio":h["hora_inicio"]})
+            adicionar.update({"hora_fim":h["hora_fim"]})
+            adicionar.update({"tipo_usuario":h["tipo_user"]})
+            adicionar.update({"last_update":h["last_update"]})
+            results_novos.append(adicionar)
+        results.update({"novos": results_novos})
+
+        horario_query = Horario.query.filter(Horario.last_update > hora).filter(Horario.alive == False).filter(Horario.id_sala == id_sala)
+        horarios = schema.dump(horario_query, many=True).data
+        results_removidos = []
+        for h in horarios:
+            adicionar = {}
+            adicionar.update({"dia":h["dia"]})
+            adicionar.update({"hora_inicio":h["hora_inicio"]})
+            adicionar.update({"hora_fim":h["hora_fim"]})
+            adicionar.update({"tipo_usuario":h["tipo_user"]})
+            results_removidos.append(adicionar)
+        results.update({"removidos": results_removidos})
+
         return jsonify(results)
