@@ -3,9 +3,12 @@ from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
+from datetime import datetime
+
 from setup import db
 from sala_model import Sala, SalaSchema
 from horario_model import Horario
+
 
 schema = SalaSchema()
 
@@ -14,10 +17,11 @@ class SalaHorarioResource(Resource):
 	@jwt_required()
 	def delete(self, id):
 		try:
-			db.session.query(Horario)\
-				.filter(Horario.id_sala == id)\
-				.delete(synchronize_session="evaluate")
-			db.session.commit()
+			horarios = [i[0] for i in db.session.query(Horario).filter(Horario.id_sala == id).all()]
+			for horario in horarios:
+				horario.alive = False
+				horario.last_update = datetime.now()
+				horario.commit()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})
@@ -31,7 +35,8 @@ class SalaResource(Resource):
 	@jwt_required()
 	def get(self, id):
 		sala_query = Sala.query.get(id)
-		if not sala_query:
+		
+		if sala_query.alive == False:
 			response = jsonify({"message": "Sala {} não existe".format(id)})
 			response.status_code = 404
 			return response
@@ -45,7 +50,7 @@ class SalaResource(Resource):
 		args = parser.parse_args(strict=True)
 		sala = Sala.query.get(id)
 
-		if not sala:
+		if sala.alive == False:
 			response = jsonify({"message": "Sala {} não existe".format(id)})
 			response.status_code = 404
 			return response
@@ -54,6 +59,7 @@ class SalaResource(Resource):
 			sala.nome = args["nome"]
 
 		try:
+			sala.last_update = datetime.now()
 			sala.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
@@ -67,11 +73,13 @@ class SalaResource(Resource):
 	def delete(self, id):
 		try:
 			sala = Sala.query.get(id)
-			if not sala:
+			if sala.alive == False:
 				response = jsonify({"message": "Sala {} não existe".format(id)})
 				response.status_code = 404
 				return response
-			sala.delete(sala)
+			sala.alive = False
+			sala.last_update = datetime.now()
+			sala.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})
@@ -85,6 +93,9 @@ class SalaListResource(Resource):
 	@jwt_required()
 	def get(self):
 		salas = Sala.query.all()
+		salas = [{"id": getattr(i, "id"), "nome": getattr(i, "nome"), "horarios": getattr(i, "horarios")} for i in salas]
+		for sala in salas:
+			sala["horarios"] = Horario.query.filter(Horario.alive == True, Horario.id_sala == sala["id"]).all()
 		results = schema.dump(salas, many=True).data
 		return results
 
@@ -110,8 +121,11 @@ class SalaListResource(Resource):
 	@jwt_required()
 	def delete(self):
 		try:
-			Sala.query.delete()
-			db.session.commit()
+			salas = Sala.query.all()
+			for sala in salas:
+	   			sala.alive = False
+	   			sala.last_update = datetime.now()
+	   			sala.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})

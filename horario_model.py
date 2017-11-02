@@ -15,7 +15,8 @@ class Horario(db.Model, CRUD):
 	hora_inicio = db.Column(db.Time, nullable=False)
 	tipo_user = db.Column(db.Enum(TipoUsuario), nullable=False)
 	id_sala = db.Column(db.Integer, db.ForeignKey("sala.id"), nullable=False)
-
+	alive = db.Column(db.Boolean, nullable=False)
+	
 	def __init__(self, id_sala, dia, hora_inicio, hora_fim, tipo_user):
 		self.id_sala = id_sala
 		self.dia = dia
@@ -23,6 +24,7 @@ class Horario(db.Model, CRUD):
 		self.hora_fim = hora_fim
 		self.tipo_user = tipo_user
 		self.last_update = datetime.now()
+		self.alive = True
 
 
 class HorarioSchema(Schema):
@@ -33,6 +35,7 @@ class HorarioSchema(Schema):
 	dia = EnumDia()
 	tipo_user = EnumTipo()
 	last_update = fields.DateTime()
+	alive = fields.Boolean()
 
 	class Meta:
 		type_ = "horario"

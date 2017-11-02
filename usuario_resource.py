@@ -181,9 +181,11 @@ class UsuarioListResource(Resource):
 				db.session.query(DireitoAcesso)\
 					.filter(DireitoAcesso.id_usuario == id)\
 					.delete(synchronize_session="evaluate")
-			Usuario.alive = False
-			Usuario.last_update = datetime.now()
-			Usuario.update()
+			usuarios = Usuario.query.all()
+			for usuario in usuarios:
+				usuario.alive = False
+				Usuario.last_update = datetime.now()
+				Usuario.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})

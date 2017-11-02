@@ -3,6 +3,8 @@ from flask_jwt import jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 from flask_restful import Resource, reqparse
 
+from datetime import datetime
+
 from setup import db
 from horario_model import Horario, HorarioSchema
 
@@ -13,7 +15,7 @@ class HorarioResource(Resource):
 	@jwt_required()
 	def get(self, id):
 		horario_query = Horario.query.get(id)
-		if not horario_query:
+		if  horario_query.alive == False:
 			response = jsonify({"message": "Horario {} não existe".format(id)})
 			response.status_code = 404
 			return response
@@ -33,7 +35,7 @@ class HorarioResource(Resource):
 		args = parser.parse_args(strict=True)
 		horario = Horario.query.get(id)
 
-		if not horario:
+		if horario.alive == False:
 			response = jsonify({"message": "Horario {} não existe".format(id)})
 			response.status_code = 404
 			return response
@@ -46,7 +48,6 @@ class HorarioResource(Resource):
 					Horario.hora_fim == args["hora_fim"]).all()
 
 		if horario_check:
-			print(horario_check)
 			response = jsonify({"message": "Horário existente"})
 			response.status_code = 403
 			return response
@@ -63,6 +64,7 @@ class HorarioResource(Resource):
 		if args["tipo_user"] and args["tipo_user"] != horario.tipo_user:
 			horario.tipo_user = args["tipo_user"]
 
+		horario.last_update = datetime.now()
 		horario.update()
 		return schema.dump(horario).data
 
@@ -70,11 +72,13 @@ class HorarioResource(Resource):
 	def delete(self, id):
 		try:
 			horario = Horario.query.get(id)
-			if not horario:
+			if horario.alive == False:
 				response = jsonify({"message": "Horario {} não existe".format(id)})
 				response.status_code = 404
 				return response
-			horario.delete(horario)
+			horario.alive = False
+			horario.last_update = datetime.now()
+			horario.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})
@@ -87,8 +91,13 @@ class HorarioResource(Resource):
 class HorarioListResource(Resource):
 	@jwt_required()
 	def get(self):
-		horarios_query = Horario.query.all()
+		horarios_query = Horario.query.filter(Horario.alive == True).all()
 		return schema.dump(horarios_query, many=True).data
+	
+	
+	def get_by_sala(self,id):
+	   	horarios = db.session.query(Horario).filter(Horario.alive == True, Horario.id_sala == id).all()
+	   	return schema.dump(horarios,many=True).data
 
 	@jwt_required()
 	def post(self):
