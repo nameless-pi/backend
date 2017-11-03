@@ -29,6 +29,7 @@ class RaspHorarioResource(Resource):
         results_novos = []
         for h in horarios:
             adicionar = {}
+            adicionar.update({"id":h["id"]})
             adicionar.update({"dia":h["dia"]})
             adicionar.update({"hora_inicio":h["hora_inicio"]})
             adicionar.update({"hora_fim":h["hora_fim"]})
@@ -42,10 +43,7 @@ class RaspHorarioResource(Resource):
         results_removidos = []
         for h in horarios:
             adicionar = {}
-            adicionar.update({"dia":h["dia"]})
-            adicionar.update({"hora_inicio":h["hora_inicio"]})
-            adicionar.update({"hora_fim":h["hora_fim"]})
-            adicionar.update({"tipo_usuario":h["tipo_user"]})
+            adicionar.update({"id":h["id"]})
             results_removidos.append(adicionar)
         results.update({"removidos": results_removidos})
 
