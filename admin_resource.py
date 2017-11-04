@@ -43,7 +43,7 @@ class AdminResource(Resource):
 
 		if args["nome"]:
 			admin.nome = args["nome"]
-		if args["login"]:
+		if args["login"] and admin.login != args["login"]:
 			check_login = len(db.session.query(Admin).filter(Admin.login == args["login"]).all()) == 1
 			if not check_login:
 				admin.login = args["login"]
@@ -67,7 +67,7 @@ class AdminResource(Resource):
 
 
 class AdminListResource(Resource):
-	#@jwt_required()
+	@jwt_required()
 	def get(self):
 		try:
 			admins = Admin.query.all()
