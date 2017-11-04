@@ -92,7 +92,7 @@ class SalaResource(Resource):
 class SalaListResource(Resource):
 	@jwt_required()
 	def get(self):
-		salas = Sala.query.all()
+		salas = Sala.query.filter(Sala.alive == True).all()
 		salas = [{"id": getattr(i, "id"), "nome": getattr(i, "nome"), "horarios": getattr(i, "horarios")} for i in salas]
 		for sala in salas:
 			sala["horarios"] = Horario.query.filter(Horario.alive == True, Horario.id_sala == sala["id"]).all()

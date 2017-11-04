@@ -24,10 +24,10 @@ class RaspCheckEventoResource(Resource):
 
         evento_query = Evento.query.filter(Evento.id_sala == id_sala).order_by(desc(Evento.horario)).first()
         eventos = schema.dump(evento_query).data
-        results = []
+        results = {}
         if eventos == {}:
-            results.append({"horario": "2001-01-01T00:00:00+00:00"})
+            results.update({"horario": "2001-01-01T00:00:00+00:00"})
         else:
-            results.append({"horario": eventos["horario"]})
+            results.update({"horario": eventos["horario"]})
         
-        return (results)
+        return jsonify(results)
