@@ -119,9 +119,10 @@ class HorarioListResource(Resource):
 					Horario.hora_fim == args["hora_fim"]).all()
 
 		if horario_check:
-			response = jsonify({"message": "Horário existente"})
-			response.status_code = 403
-			return response
+			horario_check.alive = True
+			horario_check.last_update = datetime.now()
+			query = Horario.query.get(horario.id)
+			return schema.dump(query).data, 201, {"location": "api/v1/horarios/" + str(horario.id)}
 
 		try:			
 			horario = Horario(args["id_sala"], args["dia"], 

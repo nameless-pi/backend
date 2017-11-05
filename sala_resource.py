@@ -96,7 +96,12 @@ class SalaListResource(Resource):
 	@jwt_required()
 	def get(self):
 		salas = Sala.query.filter(Sala.alive == True).all()
-		salas = [{"id": getattr(i, "id"), "nome": getattr(i, "nome"), "horarios": getattr(i, "horarios")} for i in salas]
+
+		salas = [{	"id": getattr(i, "id"), 
+					"nome": getattr(i, "nome"), 
+					"horarios": getattr(i, "horarios")
+				} for i in salas]
+				
 		for sala in salas:
 			sala["horarios"] = Horario.query.filter(Horario.alive == True, Horario.id_sala == sala["id"]).all()
 		results = schema.dump(salas, many=True).data
@@ -106,20 +111,26 @@ class SalaListResource(Resource):
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location="json")
-
 		args = parser.parse_args(strict=True)
-		try:
-			sala = Sala(args["nome"])
-			sala.add(sala)
-			query = Sala.query.order_by(Sala.id.desc()).first()
-
-		except SQLAlchemyError as e:
-			db.session.rollback()
-			resp = jsonify({"error": str(e)})
-			resp.status_code = 403
-			return resp
+		sala_nova = Sala.query.filter(Sala.alive == False, Sala.nome == args["nome"])
+		if(sala_nova != None):
+			sala_nova.alive = True
+			sala_nova.last_update = datetime.now()
+			sala_nova.nome = args["nome"]
+			return schema.dump(sala_nova).data, 201, {"location": "api/v1/salas/" + str(query.id)}
 		else:
-			return schema.dump(query).data, 201, {"location": "api/v1/salas/" + str(query.id)}
+			try:
+				sala = Sala(args["nome"])
+				sala.add(sala)
+				query = Sala.query.order_by(Sala.id.desc()).first()
+
+			except SQLAlchemyError as e:
+				db.session.rollback()
+				resp = jsonify({"error": str(e)})
+				resp.status_code = 403
+				return resp
+			else:
+				return schema.dump(query).data, 201, {"location": "api/v1/salas/" + str(query.id)}
 
 	@jwt_required()
 	def delete(self):
