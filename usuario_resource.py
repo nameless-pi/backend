@@ -22,8 +22,8 @@ class UsuarioResource(Resource):
 			response.status_code = 404
 			return respons
 		direitos_de_acesso = DireitoAcesso.query.filter(DireitoAcesso.alive == True,DireitoAcesso.id_usuario == id).all()
-		user = [{"id":getattr("id"),"nome":getattr("nome"),"tipo":getattr("tipo"),"email":getattr("email"),"rfid":getattr("rfid"),
-	   			"direito_acesso":direitos_de_acesso,"last_update":getattr("last_update"),"alive":getattr("alive")}]
+		user = [{"id":getattr(user_query,"id"),"nome":getattr(user_query,"nome"),"tipo":getattr(user_query,"tipo"),"email":getattr(user_query,"email"),"rfid":getattr(user_query,"rfid"),
+	   			"direito_acesso":direitos_de_acesso,"last_update":getattr(user_query,"last_update"),"alive":getattr(user_query,"alive")}]
 		return schema.dump(user).data
 
 	@jwt_required()
@@ -93,7 +93,10 @@ class UsuarioResource(Resource):
 
 		user.last_update = datetime.now()
 		user.update()
-		return schema.dump(user).data
+		direito_acesso_novo = DireitoAcesso.query.filter(DireitoAcesso.alive == True, DireitoAcesso.id_usuario == id).all()
+		new_user = {"id":getattr(user,"id"),"nome":getattr(user,"nome"),"tipo":getattr(user,"tipo"),"email":getattr(user,"email"),"rfid":getattr(user,"rfid"),
+	   			"direito_acesso":direito_acesso_novo,"last_update":getattr(user,"last_update"),"alive":getattr(user,"alive")}
+		return schema.dump(new_user).data
 
 	@jwt_required()
 	def delete(self, id):
