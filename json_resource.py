@@ -18,6 +18,6 @@ class JSONResource(Resource):
 	@jwt_required()
 	def get(self, tipo):
 		if tipo == "salas":
-			sala_query = db.session.query(Sala.id, Sala.nome).all()
+			sala_query = db.session.query(Sala.id, Sala.nome).filter(Sala.alive == True).all()
 			result = schema.dump(sala_query, many=True).data
 			return result
