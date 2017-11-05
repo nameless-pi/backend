@@ -8,7 +8,7 @@ from datetime import datetime
 from setup import db
 from sala_model import Sala, SalaSchema
 from horario_model import Horario
-
+from acesso_model import DireitoAcesso
 
 schema = SalaSchema()
 
@@ -78,6 +78,9 @@ class SalaResource(Resource):
 				response.status_code = 404
 				return response
 			sala.alive = False
+			acessos = db.session.query(DireitoAcesso).filter(DireitoAcesso.id_sala == id).all()
+			for acesso in acessos:
+				acesso.alive = False
 			sala.last_update = datetime.now()
 			sala.update()
 		except SQLAlchemyError as e:
