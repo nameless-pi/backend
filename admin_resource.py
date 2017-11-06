@@ -54,6 +54,9 @@ class AdminResource(Resource):
 
 	#@jwt_required()
 	def delete(self, id):
+		adms = db.session.query(Admin).all()
+		if len(adms) == 1:
+			return send_message("Há apenas um Administrador", 403)
 		try:
 			admin = Admin.query.get(id)
 			if not admin:
