@@ -285,9 +285,25 @@ class UsuarioListResource(Resource):
 				"last_update": getattr(i, "last_update"),
 				"alive": getattr(i, "alive")
 			} for i in usuario_list]
-			
-		return schema.dump(usuarios, many=True).data
 
+		return schema.dump(usuarios, many=True).data
+	@jwt_required()
+	def get_user_by_name(self,name):
+		usuario_list = db.session.query(Usuario).filter(Usuario.alive == True, 
+													Usuario.nome == name).all()
+		usuarios = [
+			{
+				"id": getattr(i, "id"),
+				"nome": getattr(i, "nome"),
+				"tipo": getattr(i, "tipo"),
+				"email": getattr(i, "email"),
+				"rfid": getattr(i, "rfid"),
+				"direito_acesso": getattr(i, "direito_acesso"),
+				"last_update": getattr(i, "last_update"),
+				"alive": getattr(i, "alive")
+			} for i in usuario_list]
+
+		return schema.dump(usuarios, many=True).data
 	@jwt_required()
 	def delete(self):
 		'''
