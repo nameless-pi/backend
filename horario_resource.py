@@ -111,7 +111,7 @@ class HorarioListResource(Resource):
 
 		args = parser.parse_args(strict=True)
 
-		horario_check = db.session.query(Horario)\
+		horario_check = db.session.query(Horario.id)\
 			.filter(Horario.id_sala == args["id_sala"],
 					Horario.dia == args["dia"],
 					Horario.tipo_user == args["tipo_user"],
@@ -119,10 +119,12 @@ class HorarioListResource(Resource):
 					Horario.hora_fim == args["hora_fim"]).all()
 
 		if horario_check:
-			horario_check.alive = True
-			horario_check.last_update = datetime.now()
-			query = Horario.query.get(horario.id)
-			return schema.dump(query).data, 201, {"location": "api/v1/horarios/" + str(horario.id)}
+			print("==========================>>>>>>>>>>",horario_check)
+			query = Horario.query.get(horario_check[0][0])
+			query.alive = True
+			query.last_update = datetime.now()
+			query.update()
+			return schema.dump(query).data, 201, {"location": "api/v1/horarios/" + str(query.id)}
 
 		try:			
 			horario = Horario(args["id_sala"], args["dia"], 
