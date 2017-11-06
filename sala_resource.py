@@ -112,12 +112,21 @@ class SalaListResource(Resource):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location="json")
 		args = parser.parse_args(strict=True)
-		sala_nova = Sala.query.filter(Sala.alive == False, Sala.nome == args["nome"])
-		if(sala_nova != None):
+		sala_nova_id = db.session.query(Sala.id).filter(Sala.alive == False, Sala.nome == args["nome"]).all()
+		
+		if sala_nova_id:
+			sala_nova = Sala.query.get(sala_nova_id[0][0])
 			sala_nova.alive = True
 			sala_nova.last_update = datetime.now()
-			sala_nova.nome = args["nome"]
-			return schema.dump(sala_nova).data, 201, {"location": "api/v1/salas/" + str(query.id)}
+			sala_nova.update()
+			salas = {	"id": getattr(sala_nova, "id"), 
+						"nome": getattr(sala_nova, "nome"), 
+						"horarios":[],
+						"last_update": getattr(sala_nova,"last_update"),
+						"alive": getattr(sala_nova,"alive")
+				}
+			
+			return schema.dump(salas).data, 201, {"location": "api/v1/salas/" + str(salas["id"])}
 		else:
 			try:
 				sala = Sala(args["nome"])
