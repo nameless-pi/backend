@@ -111,20 +111,24 @@ class HorarioListResource(Resource):
 
 		args = parser.parse_args(strict=True)
 
-		horario_check = db.session.query(Horario.id)\
+		horario_check = db.session.query(Horario)\
 			.filter(Horario.id_sala == args["id_sala"],
 					Horario.dia == args["dia"],
 					Horario.tipo_user == args["tipo_user"],
 					Horario.hora_inicio == args["hora_inicio"],
 					Horario.hora_fim == args["hora_fim"]).all()
 
-		if horario_check:
-			print("==========================>>>>>>>>>>",horario_check)
-			query = Horario.query.get(horario_check[0][0])
+		if horario_check and not horario_check[0].alive:
+			print("HORARIOS =>", horario_check, "HORARIO =>", horario_check[0])
+			query = Horario.query.get(horario_check[0].id)
 			query.alive = True
 			query.last_update = datetime.now()
 			query.update()
 			return schema.dump(query).data, 201, {"location": "api/v1/horarios/" + str(query.id)}
+		elif horario_check:
+			resp = jsonify({"message": "Este horário já existe"})
+			resp.status_code = 403
+			return resp
 
 		try:			
 			horario = Horario(args["id_sala"], args["dia"], 
