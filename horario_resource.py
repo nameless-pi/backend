@@ -94,10 +94,16 @@ class HorarioListResource(Resource):
 		horarios_query = Horario.query.filter(Horario.alive == True).all()
 		return schema.dump(horarios_query, many=True).data
 	
-	
+	@jwt_required()
 	def get_by_sala(self,id):
-	   	horarios = db.session.query(Horario).filter(Horario.alive == True, Horario.id_sala == id).all()
+	   	horarios = Horario.query.filter(Horario.alive == True, Horario.id_sala == id).all()
 	   	return schema.dump(horarios,many=True).data
+	
+	def get_by_sala_and_day(self,id_sala,day):
+		horarios = Horario.query.filter(Horario.alive == True, 
+										Horario.id_sala == id_sala, 
+										Horario.dia == day).all()
+		return schema.dump(horarios,many=True).data
 
 	@jwt_required()
 	def post(self):
@@ -119,7 +125,6 @@ class HorarioListResource(Resource):
 					Horario.hora_fim == args["hora_fim"]).all()
 
 		if horario_check and not horario_check[0].alive:
-			print("HORARIOS =>", horario_check, "HORARIO =>", horario_check[0])
 			query = Horario.query.get(horario_check[0].id)
 			query.alive = True
 			query.last_update = datetime.now()
