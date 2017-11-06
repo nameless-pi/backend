@@ -259,6 +259,19 @@ class UsuarioListResource(Resource):
 
 		return new_user
 
+
+	@jwt_required()
+	def get_users_by_room(self,id_rom):
+		acessos = db.query(DireitoAcesso).filter(DireitoAcesso.alive == True, DireitoAcesso.id_sala == id_rom).all()
+		usuarios = []
+		for acesso in acessos:
+			user = Usuario.query.get(acesso.id_user)
+			if user.alive:
+				usuarios.append(user)
+		return schema.dump(usuarios, many=True).data
+
+
+
 	@jwt_required()
 	def delete(self):
 		'''
