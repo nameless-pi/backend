@@ -9,6 +9,7 @@ from setup import db
 from sala_model import Sala, SalaSchema
 from horario_model import Horario
 from acesso_model import DireitoAcesso
+from usuario_model import Usuario
 
 schema = SalaSchema()
 
@@ -103,16 +104,42 @@ class SalaListResource(Resource):
 				} for i in salas]
 				
 		for sala in salas:
-			sala["horarios"] = Horario.query.filter(Horario.alive == True, Horario.id_sala == sala["id"]).all()
+			sala["horarios"] = Horario.query.filter(Horario.alive == True, 
+													Horario.id_sala == sala["id"]).all()
 		results = schema.dump(salas, many=True).data
 		return results
+
+	
+	@jwt_required()
+	def get_sala_by_user(self,id_user):
+		acessos = db.session.query(Usuario.direito_acesso).filter(
+													Usuario.alive == True,
+													Usuario.id == id_user
+													).all()
+		salas = []
+		for acesso in acessos:
+			sala = Sala.query.get(acesso.id_sala)
+			if sala.alive:
+				salas.append(sala)
+
+		salas_alive = [{	"id": getattr(i, "id"), 
+					"nome": getattr(i, "nome"), 
+					"horarios": getattr(i, "horarios")
+				} for i in salas]
+				
+		for sala in salas_alive:
+			sala["horarios"] = Horario.query.filter(Horario.alive == True, 
+													Horario.id_sala == sala["id"]).all()
+		 
+		return schema.dump(salas_alive, many=True).data
 
 	@jwt_required()
 	def post(self):
 		parser = reqparse.RequestParser()
 		parser.add_argument("nome", type=str, required=True, location="json")
 		args = parser.parse_args(strict=True)
-		sala_nova_id = db.session.query(Sala.id).filter(Sala.alive == False, Sala.nome == args["nome"]).all()
+		sala_nova_id = db.session.query(Sala.id).filter(Sala.alive == False, 
+														Sala.nome == args["nome"]).all()
 		
 		if sala_nova_id:
 			sala_nova = Sala.query.get(sala_nova_id[0][0])
