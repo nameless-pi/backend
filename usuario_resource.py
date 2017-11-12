@@ -17,22 +17,24 @@ class UsuarioResource(Resource):
 	@jwt_required()
 	def get(self, id):
 		user_query = Usuario.query.get(id)
-		if user_query.alive == False:
+		if not user_query.alive:
 			response = jsonify({"message": "Usuario {} não existe".format(id)})
 			response.status_code = 404
-			return respons
-		direitos_de_acesso = DireitoAcesso.query.filter(DireitoAcesso.alive == True,DireitoAcesso.id_usuario == id).all()
+			return response
+		direitos_de_acesso = DireitoAcesso.query.filter(
+			DireitoAcesso.alive,
+			DireitoAcesso.id_usuario == id
+		).all()
 		user = {
-				"id":getattr(user_query,"id"),
-				"nome":getattr(user_query,"nome"),
-				"tipo":getattr(user_query,"tipo"),
-				"email":getattr(user_query,"email"),
-				"rfid":getattr(user_query,"rfid"),
-				"direito_acesso":direitos_de_acesso,
-				"last_update":getattr(user_query,"last_update"),
-				"alive":getattr(user_query,"alive")
-			  }
-				
+			"id": getattr(user_query, "id"),
+			"nome": getattr(user_query, "nome"),
+			"tipo": getattr(user_query, "tipo"),
+			"email": getattr(user_query, "email"),
+			"rfid": getattr(user_query, "rfid"),
+			"direito_acesso": direitos_de_acesso,
+			"last_update": getattr(user_query, "last_update"),
+			"alive": getattr(user_query, "alive")
+		}
 		return schema.dump(user).data
 
 	@jwt_required()
@@ -48,7 +50,7 @@ class UsuarioResource(Resource):
 		args = parser.parse_args(strict=True)
 		user = Usuario.query.get(id)
 
-		if user.alive == False:
+		if not user.alive:
 			response = jsonify({"message": "Usuario {} não existe".format(id)})
 			response.status_code = 404
 			return response
@@ -77,23 +79,27 @@ class UsuarioResource(Resource):
 
 		# CASO NÃO TENHAM SALAS NO JSON, RETIRAR O ACESSO DE TODAS AS SALAS
 		if not args["direito_acesso"]:
-			
-				for acesso in user.direito_acesso:
-	   				acesso.alive = False;
+			for acesso in user.direito_acesso:
+				acesso.alive = False
 
 		# CASO HAJAM SALAS NO JSON E NO BANCO
 		# [{"id": 1, "nome": "E001"}]
 		elif args["direito_acesso"]:
+			# id do JSON
+			args = [literal_eval(i)["id_sala"] for i in args["direito_acesso"]]
 
-			args = [literal_eval(i)["id_sala"] for i in args["direito_acesso"]]  # id do JSON
-			acessos = [acesso.id_sala for acesso in user.direito_acesso]  # id do usuário
-			to_add = [i for i in args if i not in acessos] # tá no JSON, mas não no BANCO
+			# id do usuário
+			acessos = [acesso.id_sala for acesso in user.direito_acesso]
+
+			# tá no JSON, mas não no BANCO
+			to_add = [i for i in args if i not in acessos]
 
 			for acesso in user.direito_acesso:
-    				
-				if acesso.id_sala in args and not acesso.alive:  # sala tá no JSON e BANCO, mas tá morto no banco
+				# sala tá no JSON e BANCO, mas tá morto no banco
+				if acesso.id_sala in args and not acesso.alive:
 					acesso.alive = True
-				elif acesso.id_sala not in args and acesso.alive: # sala não tá no JSON e está no BANCO como vivo
+				# sala não tá no JSON e está no BANCO como vivo
+				elif acesso.id_sala not in args and acesso.alive:
 					acesso.alive = False
 
 			for new_acesso in to_add:
@@ -102,28 +108,33 @@ class UsuarioResource(Resource):
 
 		user.last_update = datetime.now()
 		user.update()
-		direito_acesso_novo = DireitoAcesso.query.filter(DireitoAcesso.alive == True, DireitoAcesso.id_usuario == id).all()
-		new_user = {"id":getattr(user,"id"),
-					"nome":getattr(user,"nome"),
-					"tipo":getattr(user,"tipo"),
-					"email":getattr(user,"email"),
-					"rfid":getattr(user,"rfid"),
-					"direito_acesso":direito_acesso_novo,
-					"last_update":getattr(user,"last_update"),
-					"alive":getattr(user,"alive")}
+		direito_acesso_novo = DireitoAcesso.query.filter(
+			DireitoAcesso.alive,
+			DireitoAcesso.id_usuario == id
+		).all()
+		new_user = {
+			"id": getattr(user, "id"),
+			"nome": getattr(user, "nome"),
+			"tipo": getattr(user, "tipo"),
+			"email": getattr(user, "email"),
+			"rfid": getattr(user, "rfid"),
+			"direito_acesso": direito_acesso_novo,
+			"last_update": getattr(user, "last_update"),
+			"alive": getattr(user, "alive")
+		}
 		return schema.dump(new_user).data
 
 	@jwt_required()
 	def delete(self, id):
 		try:
 			user = Usuario.query.get(id)
-			if user.alive == False:
+			if not user.alive:
 				response = jsonify({"message": "Usuario {} não existe".format(id)})
 				response.status_code = 404
 				return response
 			user.alive = False
 			for acesso in user.direito_acesso:
-	   			acesso.alive = False
+				acesso.alive = False
 			user.last_update = datetime.now()
 			user.update()
 		except SQLAlchemyError as e:
@@ -138,7 +149,7 @@ class UsuarioResource(Resource):
 class UsuarioListResource(Resource):
 	@jwt_required()
 	def get(self):
-		users_query = Usuario.query.filter(Usuario.alive == True).all()
+		users_query = Usuario.query.filter(Usuario.alive).all()
 
 		usuarios = [
 			{
@@ -154,7 +165,7 @@ class UsuarioListResource(Resource):
 
 		for usuario in usuarios:
 			usuario["direito_acesso"] = DireitoAcesso.query.filter(
-				DireitoAcesso.alive == True,
+				DireitoAcesso.alive,
 				DireitoAcesso.id_usuario == usuario["id"]
 			).all()
 		results = schema.dump(usuarios, many=True).data
@@ -172,7 +183,7 @@ class UsuarioListResource(Resource):
 		args = parser.parse_args(strict=True)
 		id_user = db.session.query(Usuario.id).filter(
 			Usuario.email == args["email"],
-			Usuario.alive == False
+			not Usuario.alive
 		).all()
 
 		if id_user:
@@ -195,7 +206,6 @@ class UsuarioListResource(Resource):
 						resp.status_code = 403
 						return resp
 				query = Usuario.query.get(user.id)
-				print("QUERY >", query)
 			except SQLAlchemyError as e:
 				db.session.rollback()
 				resp = jsonify({"error": str(e)})
@@ -242,7 +252,7 @@ class UsuarioListResource(Resource):
 		user.last_update = datetime.now()
 		user.update()
 		direito_acesso_novo = DireitoAcesso.query.filter(
-			DireitoAcesso.alive == True,
+			DireitoAcesso.alive,
 			DireitoAcesso.id_usuario == id
 		).all()
 
@@ -259,65 +269,21 @@ class UsuarioListResource(Resource):
 
 		return new_user
 
-
-	@jwt_required()
-	def get_users_by_room(self,id_rom):
-		acessos = db.query(DireitoAcesso).filter(DireitoAcesso.alive == True, DireitoAcesso.id_sala == id_rom).all()
-		usuarios = []
-		for acesso in acessos:
-			user = Usuario.query.get(acesso.id_user)
-			if user.alive:
-				usuarios.append(user)
-		return schema.dump(usuarios, many=True).data
-
-	@jwt_required()
-	def get_user_by_type(self,type_user):
-		usuario_list = db.session.query(Usuario).filter(Usuario.alive == True, 
-													Usuario.tipo == type_user).all()
-		usuarios = [
-			{
-				"id": getattr(i, "id"),
-				"nome": getattr(i, "nome"),
-				"tipo": getattr(i, "tipo"),
-				"email": getattr(i, "email"),
-				"rfid": getattr(i, "rfid"),
-				"direito_acesso": getattr(i, "direito_acesso"),
-				"last_update": getattr(i, "last_update"),
-				"alive": getattr(i, "alive")
-			} for i in usuario_list]
-
-		return schema.dump(usuarios, many=True).data
-	@jwt_required()
-	def get_user_by_name(self,name):
-		usuario_list = db.session.query(Usuario).filter(Usuario.alive == True, 
-													Usuario.nome == name).all()
-		usuarios = [
-			{
-				"id": getattr(i, "id"),
-				"nome": getattr(i, "nome"),
-				"tipo": getattr(i, "tipo"),
-				"email": getattr(i, "email"),
-				"rfid": getattr(i, "rfid"),
-				"direito_acesso": getattr(i, "direito_acesso"),
-				"last_update": getattr(i, "last_update"),
-				"alive": getattr(i, "alive")
-			} for i in usuario_list]
-
-		return schema.dump(usuarios, many=True).data
 	@jwt_required()
 	def delete(self):
 		'''
 			Como não é removido o usuário, não há necessidade de
-			remover os direito_acesso primeiro, logo é só setado como False as flags de acessos do usuário
+			remover os direito_acesso primeiro, logo é só setado
+			como False as flags de acessos do usuário
 		'''
 		try:
 			usuarios = Usuario.query.all()
 			for usuario in usuarios:
 				usuario.alive = False
-				for acesso in user.direito_acesso:
-	   	   			acesso.alive = False
-				Usuario.last_update = datetime.now()
-				Usuario.update()
+				for acesso in usuario.direito_acesso:
+					acesso.alive = False
+				usuario.last_update = datetime.now()
+				usuario.update()
 		except SQLAlchemyError as e:
 			db.session.rollback()
 			resp = jsonify({"error": str(e)})

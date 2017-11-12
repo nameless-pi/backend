@@ -9,8 +9,11 @@ from rasp_horario_resource import RaspHorarioResource
 from rasp_check_evento_resource import RaspCheckEventoResource
 from rasp_evento_resource import RaspEventoResource
 
+from search import SearchUsuario
+
 
 prefix = "/api/v1"
+api.add_resource(SearchUsuario, prefix + "/pesquisa")
 
 api.add_resource(AdminResource, prefix + "/admins/<int:id>")
 api.add_resource(AdminListResource, prefix + "/admins")
@@ -33,6 +36,8 @@ api.add_resource(RaspCheckEventoResource, prefix + "/rasp/checkevento")
 api.add_resource(RaspEventoResource, prefix + "/rasp/evento")
 
 if __name__ == "__main__":
-	app.run(host=app.config["HOST"],
-			port=app.config["PORT"],
-			debug=app.config["DEBUG"])
+	app.run(
+		host=app.config["HOST"],
+		port=app.config["PORT"],
+		debug=app.config["DEBUG"]
+	)
