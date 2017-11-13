@@ -33,7 +33,8 @@ class SearchSala(Resource):
 						"nome": getattr(sala, "nome"), 
 						"horarios": getattr(sala, "horarios")
 						}
-                salas.append(sala)
+                if not salas.__contains__(sala):
+                    salas.append(sala)
         else:
             return None, 404
 
