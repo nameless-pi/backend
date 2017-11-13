@@ -10,10 +10,12 @@ from rasp_check_evento_resource import RaspCheckEventoResource
 from rasp_evento_resource import RaspEventoResource
 
 from search import SearchUsuario
-
+from searchSala import SearchSala
 
 prefix = "/api/v1"
 api.add_resource(SearchUsuario, prefix + "/pesquisa")
+
+api.add_resource(SearchSala, prefix + "/pesquisalas")
 
 api.add_resource(AdminResource, prefix + "/admins/<int:id>")
 api.add_resource(AdminListResource, prefix + "/admins")
